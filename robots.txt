@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jaws839.github.io/Create-new-value/sitemap.xml

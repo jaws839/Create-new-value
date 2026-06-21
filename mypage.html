@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 마이페이지</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--gold2:#d4b97a;--text:#F5F5F7;--muted:#888;--ok:#4caf92;--err:#e57373}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh}
+nav{background:rgba(7,7,10,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:.15em;margin-right:auto;cursor:pointer}
+.nav-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.35rem .85rem;font-size:.77rem;cursor:pointer;font-family:inherit;transition:.2s}
+.nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+.wrap{max-width:880px;margin:0 auto;padding:2.5rem 1.5rem}
+/* PROFILE */
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem}
+.avatar{width:64px;height:64px;border-radius:50%;background:rgba(200,169,107,.2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile-info{}
+.profile-name{font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
+.profile-email{font-size:.8rem;color:var(--muted)}
+.profile-badge{display:inline-block;background:rgba(200,169,107,.15);border:1px solid rgba(200,169,107,.4);color:var(--gold);font-size:.68rem;font-weight:700;padding:.18rem .55rem;border-radius:100px;margin-top:.4rem}
+.logout-btn{margin-left:auto;background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.38rem .85rem;font-size:.77rem;cursor:pointer;font-family:inherit;transition:.2s;flex-shrink:0}
+.logout-btn:hover{border-color:var(--err);color:var(--err)}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.3rem;text-align:center}
+.stat-big{font-size:1.6rem;font-weight:900;color:var(--gold)}
+.stat-lbl{font-size:.73rem;color:var(--muted);margin-top:.25rem}
+/* ORDERS */
+.section-title{font-size:1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.order-list{display:flex;flex-direction:column;gap:.8rem}
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.2rem;cursor:pointer;transition:.2s}
+.order-card:hover{border-color:rgba(200,169,107,.3)}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;gap:.5rem}
+.order-id{font-size:.72rem;color:var(--muted);font-family:monospace}
+.order-status{font-size:.7rem;font-weight:700;padding:.22rem .65rem;border-radius:100px}
+.status-complete{background:rgba(76,175,146,.15);color:var(--ok)}
+.status-shipping{background:rgba(33,150,243,.15);color:#64b5f6}
+.status-pending{background:rgba(255,193,7,.15);color:#ffd54f}
+.order-name{font-size:.88rem;font-weight:600;margin-bottom:.35rem}
+.order-bottom{display:flex;justify-content:space-between;align-items:center}
+.order-date{font-size:.72rem;color:var(--muted)}
+.order-amt{font-size:.92rem;font-weight:700;color:var(--gold)}
+.empty-orders{text-align:center;padding:4rem 2rem;color:var(--muted)}
+.empty-orders .icon{font-size:3rem;margin-bottom:.8rem}
+.empty-orders p{font-size:.88rem;margin-bottom:1.2rem}
+.go-shop{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.7rem 1.8rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+.go-shop:hover{background:var(--gold2)}
+.loading-box{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
+.not-logged{text-align:center;padding:5rem 2rem}
+.not-logged .icon{font-size:3rem;margin-bottom:.8rem}
+.not-logged p{margin-bottom:1.5rem;color:var(--muted)}
+.login-btn{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.75rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+.login-btn:hover{background:var(--gold2)}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr}.profile-card{flex-direction:column;text-align:center}.logout-btn{margin:0}}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo" onclick="location.href='index.html'">MIRU</span>
+  <button class="nav-btn" onclick="location.href='index.html'">🏠 홈</button>
+  <button class="nav-btn" onclick="location.href='checkout.html'">🛒 장바구니</button>
+</nav>
+
+<div class="wrap" id="mainWrap">
+  <div class="loading-box">⏳ 사용자 정보 불러오는 중...</div>
+</div>
+
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyA-0D07ctDzrLWxLAmgPJ-OfOaDBaJOeno",authDomain:"miru-3806d.firebaseapp.com",projectId:"miru-3806d",storageBucket:"miru-3806d.firebasestorage.app",messagingSenderId:"958166030740",appId:"1:958166030740:web:b5dc0bc7dbfff534335781",measurementId:"G-X9H839X893"};
+
+let fbReady=false,db=null;
+function initFb(){if(fbReady)return;firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();fbReady=true;}
+
+const savedUser=JSON.parse(sessionStorage.getItem('miru_user')||'null');
+
+function renderNotLoggedIn(){
+  document.getElementById('mainWrap').innerHTML=`<div class="not-logged"><div class="icon">🔐</div><p>로그인 후 주문 내역을 확인하세요</p><button class="login-btn" onclick="location.href='auth.html'">로그인 / 회원가입</button></div>`;
+}
+
+async function renderMypage(user){
+  const wrap=document.getElementById('mainWrap');
+  const name=user.displayName||user.email.split('@')[0];
+  const photo=user.photoURL;
+
+  let orders=[];
+  try{
+    initFb();
+    const snap=await db.collection('orders').where('userEmail','==',user.email).orderBy('createdAt','desc').limit(20).get();
+    orders=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.warn('주문 불러오기 실패 (Firebase 설정 필요):',e.message);}
+
+  const totalAmt=orders.reduce((s,o)=>s+o.amount,0);
+  const statusMap={'결제완료':'status-complete','배송중':'status-shipping','배송완료':'status-complete','대기중':'status-pending'};
+
+  wrap.innerHTML=`
+    <div class="profile-card">
+      <div class="avatar">${photo?`<img src="${photo}" alt="${name}">`:'👤'}</div>
+      <div class="profile-info">
+        <div class="profile-name">${name}</div>
+        <div class="profile-email">${user.email}</div>
+        <div class="profile-badge">MIRU 회원</div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-big">${orders.length}</div><div class="stat-lbl">총 주문</div></div>
+      <div class="stat-card"><div class="stat-big">₩${(totalAmt/10000).toFixed(0)}만</div><div class="stat-lbl">누적 구매금액</div></div>
+      <div class="stat-card"><div class="stat-big">${orders.filter(o=>o.status==='배송완료').length}</div><div class="stat-lbl">배송 완료</div></div>
+    </div>
+
+    <div class="section-title">📋 주문 내역</div>
+    <div class="order-list">
+      ${orders.length===0?`<div class="empty-orders"><div class="icon">🛒</div><p>아직 주문 내역이 없습니다</p><button class="go-shop" onclick="location.href='index.html'">쇼핑하러 가기</button></div>`
+      :orders.map(o=>`<div class="order-card">
+        <div class="order-top">
+          <div class="order-id">${o.orderId||o.id}</div>
+          <div class="order-status ${statusMap[o.status]||'status-pending'}">${o.status||'처리중'}</div>
+        </div>
+        <div class="order-name">${o.orderName||'MIRU 주문'}</div>
+        <div class="order-bottom">
+          <div class="order-date">${o.createdAt?.toDate?o.createdAt.toDate().toLocaleDateString('ko-KR'):'날짜 정보 없음'}</div>
+          <div class="order-amt">₩${(o.amount||0).toLocaleString()}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function doLogout(){
+  sessionStorage.removeItem('miru_user');
+  if(fbReady) firebase.auth().signOut().catch(()=>{});
+  location.href='index.html';
+}
+
+// Main
+if(!savedUser){renderNotLoggedIn();}
+else{renderMypage(savedUser);}
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 결제 실패</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--text:#F5F5F7;--muted:#888;--err:#e57373}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.card{background:rgba(13,13,18,.9);border:1px solid var(--border);border-radius:24px;padding:3rem 2.5rem;max-width:440px;width:100%;text-align:center}
+.fail-icon{font-size:4rem;margin-bottom:1.2rem}
+.fail-title{font-size:1.5rem;font-weight:900;margin-bottom:.5rem}
+.fail-sub{font-size:.88rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.err-code{background:rgba(229,115,115,.1);border:1px solid rgba(229,115,115,.3);color:var(--err);border-radius:10px;padding:.8rem;font-size:.78rem;margin-bottom:2rem;line-height:1.5}
+.btn-gold{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;padding:.8rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:.7rem;transition:.2s}
+.btn-gold:hover{background:#d4b97a}
+.btn-ghost{width:100%;background:none;border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:.8rem;font-size:.88rem;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="fail-icon">❌</div>
+  <div class="fail-title">결제에 실패했습니다</div>
+  <div class="fail-sub">결제 처리 중 문제가 발생했습니다.<br>장바구니 내용은 그대로 유지됩니다.</div>
+  <div class="err-code" id="errCode">오류 정보를 불러오는 중...</div>
+  <button class="btn-gold" onclick="location.href='checkout.html'">다시 결제하기</button>
+  <button class="btn-ghost" onclick="location.href='index.html'">홈으로 돌아가기</button>
+</div>
+<script>
+const p=new URLSearchParams(location.search);
+const code=p.get('code')||'UNKNOWN_ERROR';
+const msg=p.get('message')||'알 수 없는 오류가 발생했습니다';
+const errMsgs={
+  'PAY_PROCESS_CANCELED':'사용자가 결제를 취소했습니다.',
+  'PAY_PROCESS_ABORTED':'결제 진행 중 오류가 발생했습니다.',
+  'EXCEED_MAX_CARD_INSTALLMENT_PLAN':'설정 가능한 최대 할부 개월수를 초과했습니다.',
+  'INVALID_CARD_COMPANY':'유효하지 않은 카드사입니다.'
+};
+document.getElementById('errCode').innerHTML=`<strong>오류 코드:</strong> ${code}<br><strong>내용:</strong> ${errMsgs[code]||msg}`;
+</script>
+</body>
+</html>

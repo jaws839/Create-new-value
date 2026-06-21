@@ -1,0 +1,14 @@
+{
+  "name": "MIRU 라이프스타일 스토어",
+  "short_name": "MIRU",
+  "description": "일상의 아름다움을 발견하는 라이프스타일 스토어",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070A",
+  "theme_color": "#C8A96B",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

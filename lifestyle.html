@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#C8A96B">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+  <title>MIRU | 라이프스타일</title>
+  <meta name="description" content="MIRU 라이프스타일 컬렉션 · 55개 제품 · 오더베이스 위탁판매">
+  <style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070A;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --gold:#C8A96B;--gold-dim:#9a7d4f;--text:#F5F5F7;--muted:#888;
+  --green:#4caf92;--blur:28px;--radius:16px
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,7,10,.92);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+  padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.nav-logo{font-size:1.35rem;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-right:auto}
+.nav-links{display:flex;gap:.4rem;flex-wrap:wrap}
+.nav-links a{padding:.35rem .85rem;border-radius:100px;font-size:.78rem;
+  border:1px solid var(--border);transition:.2s;color:var(--muted)}
+.nav-links a:hover,.nav-links a.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+.nav-cart-btn{background:none;border:1px solid var(--border);color:var(--text);
+  border-radius:100px;padding:.35rem .85rem;font-size:.78rem;cursor:pointer;
+  transition:.2s;white-space:nowrap;font-family:inherit}
+.nav-cart-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-cart-btn.has-items{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:3.5rem 1.5rem 2.5rem;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(200,169,107,.1),transparent)}
+.hero-badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);
+  font-size:.7rem;padding:.28rem .85rem;border-radius:100px;letter-spacing:.12em;margin-bottom:1.1rem}
+.hero h1{font-size:clamp(1.7rem,4.5vw,3rem);font-weight:700;line-height:1.2;margin-bottom:.7rem}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);font-size:.9rem;max-width:460px;margin:0 auto 2rem}
+.hero-stats{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.stat-num{font-size:1.55rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+
+/* ── SEARCH + FILTER BAR ── */
+.filter-bar{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;
+  position:sticky;top:57px;z-index:150;backdrop-filter:blur(16px)}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap input{width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:100px;padding:.5rem 1rem .5rem 2.2rem;color:var(--text);font-size:.85rem;
+  outline:none;font-family:inherit;transition:.2s}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem}
+.filter-group{display:flex;gap:.4rem;flex-wrap:wrap}
+.filter-chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;transition:.2s;
+  white-space:nowrap;font-family:inherit}
+.filter-chip:hover{border-color:var(--gold-dim);color:var(--text)}
+.filter-chip.active{background:rgba(200,169,107,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.sort-select{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;
+  outline:none;font-family:inherit}
+.result-count{font-size:.78rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+/* ── PRODUCT GRID ── */
+.section{padding:2rem 1.5rem 3rem;max-width:1240px;margin:0 auto}
+.section-title{font-size:1rem;font-weight:700;letter-spacing:.05em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.9rem}
+
+/* ── PRODUCT CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;transition:.25s;cursor:pointer;position:relative}
+.card:hover{transform:translateY(-5px);border-color:var(--gold-dim);
+  box-shadow:0 10px 36px rgba(200,169,107,.14)}
+.card-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:#111}
+.card-img{width:100%;height:100%;object-fit:cover;display:block;transition:.35s}
+.card:hover .card-img{transform:scale(1.06)}
+.card-badge{position:absolute;top:.6rem;left:.6rem;background:var(--gold);color:#000;
+  font-size:.63rem;font-weight:700;padding:.18rem .52rem;border-radius:100px;letter-spacing:.05em;z-index:1}
+.card-body{padding:.85rem}
+.card-name{font-size:.82rem;font-weight:500;line-height:1.35;margin-bottom:.45rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-price{font-size:.98rem;font-weight:700;color:var(--gold)}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem}
+.card-margin{font-size:.68rem;color:var(--green);font-weight:700}
+.card-rating{font-size:.68rem;color:var(--muted)}
+.card-btn{width:100%;margin-top:.65rem;background:rgba(200,169,107,.12);border:1px solid var(--gold-dim);
+  color:var(--gold);border-radius:8px;padding:.45rem;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:.2s;font-family:inherit}
+.card-btn:hover{background:var(--gold);color:#000}
+
+/* ── SKELETON ── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 100%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.skel-img{aspect-ratio:1;width:100%}
+.skel-body{padding:.85rem;display:flex;flex-direction:column;gap:.5rem}
+.skel-line{height:.7rem;border-radius:4px}
+.skel-line.w70{width:70%}.skel-line.w50{width:50%}.skel-line.w30{width:30%}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:5rem 1.5rem;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:1rem}
+.empty p{font-size:.9rem}
+
+/* ── CART SIDEBAR ── */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:300;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
+.sidebar-overlay.open{opacity:1;pointer-events:all}
+.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:min(380px,100vw);
+  background:#111;border-left:1px solid var(--border);z-index:400;
+  transform:translateX(100%);transition:.3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column}
+.cart-sidebar.open{transform:translateX(0)}
+.cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center}
+.cart-header h3{font-size:1rem;font-weight:700}
+.cart-close{background:none;border:none;color:var(--muted);font-size:1.3rem;
+  cursor:pointer;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-close:hover{color:var(--text);background:var(--surface)}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;display:flex;flex-direction:column;gap:.8rem}
+.cart-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:.85rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.cart-item-name{font-size:.82rem;flex:1;line-height:1.3}
+.cart-item-price{font-size:.85rem;font-weight:700;color:var(--gold);white-space:nowrap}
+.cart-item-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:.85rem;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-item-del:hover{color:#e57373;background:rgba(229,115,115,.1)}
+.cart-empty{text-align:center;color:var(--muted);padding:3rem 0;font-size:.88rem}
+.cart-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:1rem;font-size:.9rem}
+.cart-total-price{font-weight:700;color:var(--gold)}
+.cart-checkout{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;
+  padding:.85rem;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.cart-checkout:hover{background:#d4b478}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:1.5rem;background:rgba(20,20,24,.96);
+  border:1px solid var(--gold);color:var(--text);
+  padding:.65rem 1.1rem;border-radius:12px;font-size:.82rem;
+  transform:translateY(120px);opacity:0;transition:.3s cubic-bezier(.4,0,.2,1);z-index:500}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── PWA INSTALL BANNER ── */
+.pwa-banner{display:none;position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);
+  background:rgba(20,20,24,.96);border:1px solid var(--gold);border-radius:16px;
+  padding:.9rem 1.4rem;gap:.9rem;align-items:center;z-index:500;max-width:380px;width:90%}
+.pwa-banner.visible{display:flex}
+.pwa-banner-text{font-size:.82rem;flex:1;line-height:1.4}
+.pwa-banner-text strong{color:var(--gold);display:block;margin-bottom:.15rem}
+.pwa-install-btn{background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:.45rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.pwa-banner-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem}
+
+/* ── CAT GRID (index only) ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:2rem;text-align:center;transition:.25s;cursor:pointer}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-3px);background:rgba(200,169,107,.06)}
+.cat-icon{font-size:2.4rem;margin-bottom:.75rem}
+.cat-name{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
+.cat-count{font-size:.78rem;color:var(--muted)}
+.cat-margin{font-size:.78rem;color:var(--green);font-weight:600;margin-top:.3rem}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;
+  color:var(--muted);font-size:.78rem}
+footer .footer-logo{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:.4rem}
+
+@media(max-width:600px){
+  .card-grid{grid-template-columns:repeat(2,1fr);gap:.6rem}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .filter-bar{top:52px;gap:.5rem}
+  nav{padding:.7rem 1rem}
+  .section{padding:1.5rem 1rem 2.5rem}
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">MIRU</span>
+  <div class="nav-links">
+    <a href="index.html" class="">🏠 홈</a>
+    <a href="beauty.html" class="">💄 뷰티</a>
+    <a href="lifestyle.html" class="active">🏡 라이프</a>
+    <a href="pet.html" class="">🐾 반려</a>
+    <a href="sports.html" class="">⚽ 스포츠</a>
+  </div>
+  <button class="nav-cart-btn" id="navCartBtn" onclick="openCart()">🛒 장바구니</button>
+</nav>
+
+<div class="hero" style="padding:2.2rem 1.5rem 1.8rem">
+  <div class="hero-badge">🏡 라이프스타일</div>
+  <h1><span>라이프스타일</span> 컬렉션</h1>
+  <p>오더베이스 위탁판매 · 55개 제품 · 평균 마진 49.1%</p>
+</div>
+
+<div class="filter-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" placeholder="라이프스타일 제품 검색..." oninput="setSearch(this.value)">
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fp active" onclick="setPrice('all',this)">전체</button>
+    <button class="filter-chip fp" onclick="setPrice('u20',this)">~₩20k</button>
+    <button class="filter-chip fp" onclick="setPrice('u50',this)">₩20~50k</button>
+    <button class="filter-chip fp" onclick="setPrice('o50',this)">₩50k+</button>
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fm active" onclick="setMargin('all',this)">전체</button>
+    <button class="filter-chip fm" onclick="setMargin('m40',this)">마진 40%+</button>
+    <button class="filter-chip fm" onclick="setMargin('m45',this)">마진 45%+</button>
+  </div>
+  <select class="sort-select" onchange="setSort(this.value)">
+    <option value="default">기본순</option>
+    <option value="price_asc">가격 낮은순</option>
+    <option value="price_desc">가격 높은순</option>
+    <option value="margin">마진 높은순</option>
+    <option value="rating">평점순</option>
+  </select>
+  <span class="result-count" id="resultCount">55개</span>
+</div>
+
+<div class="section">
+  <div class="card-grid" id="productGrid" style="display:none"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+  <div class="card-grid" id="productGrid"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+</div>
+
+<footer>
+  <div class="footer-logo">MIRU</div>
+  <p>일상의 아름다움을 발견하는 라이프스타일 스토어</p>
+  <p style="margin-top:.5rem">오더베이스 위탁판매 · 재고 0 · 마진 30%+</p>
+</footer>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>🛒 장바구니</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>합계</span>
+      <span class="cart-total-price" id="cartTotalPrice">₩0</span>
+    </div>
+    <button class="cart-checkout" onclick="showToast('✅ 주문하기 기능은 준비중입니다')">주문하기</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-text">
+    <strong>MIRU 앱 설치</strong>홈 화면에 추가하면 더 빠르게 이용할 수 있어요
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">설치</button>
+  <button class="pwa-banner-close" onclick="dismissPWA()">✕</button>
+</div>
+
+<script>
+window.__PRODUCTS__ = [{"id": "lifestyle-001", "slug": "neck-cooler", "name": "아이스 넥쿨러", "category": "lifestyle", "categoryName": "라이프스타일", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "BEST", "rating": 4.7, "reviews": 450, "image": "https://picsum.photos/seed/neck-cooler/400/400"}, {"id": "lifestyle-002", "slug": "neck-fan", "name": "목걸이형 선풍기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 28900, "cost": 12000, "margin": 45.1, "badge": "BEST", "rating": 4.5, "reviews": 403, "image": "https://picsum.photos/seed/neck-fan/400/400"}, {"id": "lifestyle-003", "slug": "aroma-diffuser", "name": "아로마 디퓨저 초음파", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "BEST", "rating": 4.4, "reviews": 277, "image": "https://picsum.photos/seed/aroma-diffuser/400/400"}, {"id": "lifestyle-004", "slug": "air-purifier", "name": "스마트 공기청정기 미니", "category": "lifestyle", "categoryName": "라이프스타일", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "NEW", "rating": 4.4, "reviews": 91, "image": "https://picsum.photos/seed/air-purifier/400/400"}, {"id": "lifestyle-005", "slug": "uv-sterilizer", "name": "UV 살균기 충전식", "category": "lifestyle", "categoryName": "라이프스타일", "price": 24900, "cost": 10000, "margin": 44.8, "badge": "NEW", "rating": 4.4, "reviews": 149, "image": "https://picsum.photos/seed/uv-sterilizer/400/400"}, {"id": "lifestyle-006", "slug": "mini-humidifier", "name": "미니 가습기 USB", "category": "lifestyle", "categoryName": "라이프스타일", "price": 18900, "cost": 7800, "margin": 39.9, "badge": "NEW", "rating": 4.9, "reviews": 365, "image": "https://picsum.photos/seed/mini-humidifier/400/400"}, {"id": "lifestyle-007", "slug": "smart-light", "name": "스마트 야간 조명", "category": "lifestyle", "categoryName": "라이프스타일", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.8, "reviews": 185, "image": "https://picsum.photos/seed/smart-light/400/400"}, {"id": "lifestyle-008", "slug": "camping-lantern", "name": "캠핑 랜턴 LED 충전식", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.6, "reviews": 477, "image": "https://picsum.photos/seed/camping-lantern/400/400"}, {"id": "lifestyle-009", "slug": "camping-chair", "name": "접이식 캠핑 의자", "category": "lifestyle", "categoryName": "라이프스타일", "price": 44900, "cost": 18500, "margin": 49.1, "badge": "", "rating": 4.6, "reviews": 43, "image": "https://picsum.photos/seed/camping-chair/400/400"}, {"id": "lifestyle-010", "slug": "tumbler", "name": "보온 텀블러 500ml", "category": "lifestyle", "categoryName": "라이프스타일", "price": 24900, "cost": 10000, "margin": 44.8, "badge": "", "rating": 4.9, "reviews": 354, "image": "https://picsum.photos/seed/tumbler/400/400"}, {"id": "lifestyle-011", "slug": "smart-scale", "name": "스마트 체중계 체지방", "category": "lifestyle", "categoryName": "라이프스타일", "price": 39900, "cost": 16500, "margin": 48.1, "badge": "", "rating": 4.5, "reviews": 340, "image": "https://picsum.photos/seed/smart-scale/400/400"}, {"id": "lifestyle-012", "slug": "wine-opener", "name": "전동 와인 오프너", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.9, "reviews": 342, "image": "https://picsum.photos/seed/wine-opener/400/400"}, {"id": "lifestyle-013", "slug": "coffee-warmer", "name": "USB 커피 워머", "category": "lifestyle", "categoryName": "라이프스타일", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.5, "reviews": 163, "image": "https://picsum.photos/seed/coffee-warmer/400/400"}, {"id": "lifestyle-014", "slug": "kitchen-timer", "name": "다기능 주방 타이머", "category": "lifestyle", "categoryName": "라이프스타일", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.9, "reviews": 89, "image": "https://picsum.photos/seed/kitchen-timer/400/400"}, {"id": "lifestyle-015", "slug": "kitchen-set", "name": "실리콘 주방 도구 세트", "category": "lifestyle", "categoryName": "라이프스타일", "price": 22900, "cost": 9200, "margin": 43.7, "badge": "", "rating": 4.3, "reviews": 322, "image": "https://picsum.photos/seed/kitchen-set/400/400"}, {"id": "lifestyle-016", "slug": "travel-iron", "name": "미니 다리미 여행용", "category": "lifestyle", "categoryName": "라이프스타일", "price": 29900, "cost": 12000, "margin": 46.8, "badge": "", "rating": 4.5, "reviews": 48, "image": "https://picsum.photos/seed/travel-iron/400/400"}, {"id": "lifestyle-017", "slug": "vacuum-bags", "name": "압축 팩 여행용 8종", "category": "lifestyle", "categoryName": "라이프스타일", "price": 18900, "cost": 7800, "margin": 39.9, "badge": "", "rating": 4.7, "reviews": 89, "image": "https://picsum.photos/seed/vacuum-bags/400/400"}, {"id": "lifestyle-018", "slug": "mini-sewing", "name": "미니 재봉틀 전동", "category": "lifestyle", "categoryName": "라이프스타일", "price": 39900, "cost": 16500, "margin": 48.1, "badge": "", "rating": 4.9, "reviews": 40, "image": "https://picsum.photos/seed/mini-sewing/400/400"}, {"id": "lifestyle-019", "slug": "electric-eraser", "name": "전동 지우개 문구용", "category": "lifestyle", "categoryName": "라이프스타일", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.5, "reviews": 324, "image": "https://picsum.photos/seed/electric-eraser/400/400"}, {"id": "lifestyle-020", "slug": "hygrometer", "name": "스마트 온습도계", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8200, "margin": 40.7, "badge": "", "rating": 4.8, "reviews": 121, "image": "https://picsum.photos/seed/hygrometer/400/400"}, {"id": "lifestyle-021", "slug": "bt-speaker", "name": "포터블 블루투스 스피커 방수", "category": "lifestyle", "categoryName": "라이프스타일", "price": 44900, "cost": 18500, "margin": 49.1, "badge": "", "rating": 4.9, "reviews": 369, "image": "https://picsum.photos/seed/bt-speaker/400/400"}, {"id": "lifestyle-022", "slug": "wireless-charger", "name": "무선 충전 멀티 패드", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.8, "reviews": 276, "image": "https://picsum.photos/seed/wireless-charger/400/400"}, {"id": "lifestyle-023", "slug": "smart-bulb", "name": "스마트 전구 RGBW", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.8, "reviews": 12, "image": "https://picsum.photos/seed/smart-bulb/400/400"}, {"id": "lifestyle-024", "slug": "led-strip", "name": "LED 스트립 5m RGB", "category": "lifestyle", "categoryName": "라이프스타일", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.5, "reviews": 191, "image": "https://picsum.photos/seed/led-strip/400/400"}, {"id": "lifestyle-025", "slug": "solar-garden", "name": "태양광 LED 가든등 4개", "category": "lifestyle", "categoryName": "라이프스타일", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.7, "reviews": 280, "image": "https://picsum.photos/seed/solar-garden/400/400"}, {"id": "lifestyle-026", "slug": "auto-watering", "name": "실내 화분 자동 급수 장치", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.8, "reviews": 159, "image": "https://picsum.photos/seed/auto-watering/400/400"}, {"id": "lifestyle-027", "slug": "plant-led", "name": "다육이 성장 LED 식물등", "category": "lifestyle", "categoryName": "라이프스타일", "price": 29900, "cost": 12200, "margin": 46.2, "badge": "", "rating": 4.5, "reviews": 94, "image": "https://picsum.photos/seed/plant-led/400/400"}, {"id": "lifestyle-028", "slug": "plant-purifier", "name": "소형 공기청정 식물 흡착기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.4, "reviews": 125, "image": "https://picsum.photos/seed/plant-purifier/400/400"}, {"id": "lifestyle-029", "slug": "candle-holder", "name": "향기 나는 캔들 홀더", "category": "lifestyle", "categoryName": "라이프스타일", "price": 24900, "cost": 10000, "margin": 44.8, "badge": "", "rating": 4.9, "reviews": 59, "image": "https://picsum.photos/seed/candle-holder/400/400"}, {"id": "lifestyle-030", "slug": "mini-projector", "name": "미니 프로젝터 휴대용", "category": "lifestyle", "categoryName": "라이프스타일", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.4, "reviews": 408, "image": "https://picsum.photos/seed/mini-projector/400/400"}, {"id": "lifestyle-031", "slug": "smart-doorbell", "name": "스마트 도어벨 무선", "category": "lifestyle", "categoryName": "라이프스타일", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.8, "reviews": 203, "image": "https://picsum.photos/seed/smart-doorbell/400/400"}, {"id": "lifestyle-032", "slug": "car-mount", "name": "마그네틱 폰 거치대 차량용", "category": "lifestyle", "categoryName": "라이프스타일", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.7, "reviews": 296, "image": "https://picsum.photos/seed/car-mount/400/400"}, {"id": "lifestyle-033", "slug": "car-purifier", "name": "차량용 공기청정기 USB", "category": "lifestyle", "categoryName": "라이프스타일", "price": 22900, "cost": 9200, "margin": 43.7, "badge": "", "rating": 4.4, "reviews": 312, "image": "https://picsum.photos/seed/car-purifier/400/400"}, {"id": "lifestyle-034", "slug": "handy-vacuum", "name": "핸디형 진공청소기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 59900, "cost": 25000, "margin": 50.3, "badge": "", "rating": 4.5, "reviews": 235, "image": "https://picsum.photos/seed/handy-vacuum/400/400"}, {"id": "lifestyle-035", "slug": "robot-cleaner", "name": "로봇청소기 미니", "category": "lifestyle", "categoryName": "라이프스타일", "price": 129900, "cost": 54000, "margin": 53.1, "badge": "", "rating": 4.9, "reviews": 263, "image": "https://picsum.photos/seed/robot-cleaner/400/400"}, {"id": "lifestyle-036", "slug": "steam-cleaner", "name": "스팀 청소기 핸드형", "category": "lifestyle", "categoryName": "라이프스타일", "price": 54900, "cost": 23000, "margin": 49.6, "badge": "", "rating": 4.7, "reviews": 137, "image": "https://picsum.photos/seed/steam-cleaner/400/400"}, {"id": "lifestyle-037", "slug": "sonic-toothbrush", "name": "전동 칫솔 음파진동", "category": "lifestyle", "categoryName": "라이프스타일", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.5, "reviews": 153, "image": "https://picsum.photos/seed/sonic-toothbrush/400/400"}, {"id": "lifestyle-038", "slug": "teeth-whitening", "name": "치아 미백 LED 키트", "category": "lifestyle", "categoryName": "라이프스타일", "price": 39900, "cost": 16500, "margin": 48.1, "badge": "", "rating": 4.7, "reviews": 119, "image": "https://picsum.photos/seed/teeth-whitening/400/400"}, {"id": "lifestyle-039", "slug": "water-flosser", "name": "구강 세정기 워터픽", "category": "lifestyle", "categoryName": "라이프스타일", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.6, "reviews": 278, "image": "https://picsum.photos/seed/water-flosser/400/400"}, {"id": "lifestyle-040", "slug": "anti-snoring", "name": "코골이 방지 기기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.3, "reviews": 418, "image": "https://picsum.photos/seed/anti-snoring/400/400"}, {"id": "lifestyle-041", "slug": "neck-traction", "name": "목 견인 마사지 기기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 39900, "cost": 16500, "margin": 48.1, "badge": "", "rating": 4.3, "reviews": 168, "image": "https://picsum.photos/seed/neck-traction/400/400"}, {"id": "lifestyle-042", "slug": "massage-pad", "name": "안마 의자 미니 패드", "category": "lifestyle", "categoryName": "라이프스타일", "price": 79900, "cost": 33000, "margin": 51.9, "badge": "", "rating": 4.6, "reviews": 71, "image": "https://picsum.photos/seed/massage-pad/400/400"}, {"id": "lifestyle-043", "slug": "foot-massager-mat", "name": "전동 안마 발판", "category": "lifestyle", "categoryName": "라이프스타일", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.6, "reviews": 180, "image": "https://picsum.photos/seed/foot-massager-mat/400/400"}, {"id": "lifestyle-044", "slug": "nc-headphone", "name": "무선 헤드폰 노이즈캔슬링", "category": "lifestyle", "categoryName": "라이프스타일", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.6, "reviews": 325, "image": "https://picsum.photos/seed/nc-headphone/400/400"}, {"id": "lifestyle-045", "slug": "tws-earbuds", "name": "TWS 이어폰 ANC", "category": "lifestyle", "categoryName": "라이프스타일", "price": 59900, "cost": 25000, "margin": 50.3, "badge": "", "rating": 4.5, "reviews": 466, "image": "https://picsum.photos/seed/tws-earbuds/400/400"}, {"id": "lifestyle-046", "slug": "smartwatch", "name": "스마트워치 혈압 측정", "category": "lifestyle", "categoryName": "라이프스타일", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.5, "reviews": 25, "image": "https://picsum.photos/seed/smartwatch/400/400"}, {"id": "lifestyle-047", "slug": "desk-fan", "name": "미니 선풍기 USB 탁상", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8200, "margin": 40.7, "badge": "", "rating": 4.6, "reviews": 460, "image": "https://picsum.photos/seed/desk-fan/400/400"}, {"id": "lifestyle-048", "slug": "foldable-light", "name": "접이식 스탠드 조명 LED", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.8, "reviews": 265, "image": "https://picsum.photos/seed/foldable-light/400/400"}, {"id": "lifestyle-049", "slug": "motion-led", "name": "모션 감지 LED 무드등", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.5, "reviews": 28, "image": "https://picsum.photos/seed/motion-led/400/400"}, {"id": "lifestyle-050", "slug": "white-noise", "name": "수면 유도 백색소음기", "category": "lifestyle", "categoryName": "라이프스타일", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.4, "reviews": 64, "image": "https://picsum.photos/seed/white-noise/400/400"}, {"id": "lifestyle-051", "slug": "wireless-kb-mouse", "name": "무선 키보드 마우스 세트", "category": "lifestyle", "categoryName": "라이프스타일", "price": 44900, "cost": 18500, "margin": 49.1, "badge": "", "rating": 4.6, "reviews": 296, "image": "https://picsum.photos/seed/wireless-kb-mouse/400/400"}, {"id": "lifestyle-052", "slug": "tablet-stand", "name": "태블릿 거치대 접이식", "category": "lifestyle", "categoryName": "라이프스타일", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.8, "reviews": 321, "image": "https://picsum.photos/seed/tablet-stand/400/400"}, {"id": "lifestyle-053", "slug": "cable-organizer", "name": "다기능 케이블 정리함", "category": "lifestyle", "categoryName": "라이프스타일", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.6, "reviews": 349, "image": "https://picsum.photos/seed/cable-organizer/400/400"}, {"id": "lifestyle-054", "slug": "mini-fridge", "name": "미니 냉장고 화장품용", "category": "lifestyle", "categoryName": "라이프스타일", "price": 69900, "cost": 29000, "margin": 51.2, "badge": "", "rating": 4.5, "reviews": 414, "image": "https://picsum.photos/seed/mini-fridge/400/400"}, {"id": "lifestyle-055", "slug": "egg-cooker", "name": "전기 에그쿠커 7구", "category": "lifestyle", "categoryName": "라이프스타일", "price": 24900, "cost": 10000, "margin": 44.8, "badge": "", "rating": 4.7, "reviews": 40, "image": "https://picsum.photos/seed/egg-cooker/400/400"}];
+
+// ── CART ──
+let cart = JSON.parse(sessionStorage.getItem('miru_cart')||'[]');
+
+function openCart(){
+  document.getElementById('cartSidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  renderCartItems();
+}
+function closeCart(){
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function renderCartItems(){
+  const el = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  if(!cart.length){
+    el.innerHTML='<div class="cart-empty">🛒 장바구니가 비어있습니다</div>';
+    if(footerEl) footerEl.style.display='none';
+    return;
+  }
+  if(footerEl) footerEl.style.display='block';
+  const total = cart.reduce((s,i)=>s+i.price,0);
+  el.innerHTML = cart.map((item,i)=>`
+    <div class="cart-item">
+      <div class="cart-item-name">${item.name}</div>
+      <div class="cart-item-price">₩${item.price.toLocaleString()}</div>
+      <button class="cart-item-del" onclick="removeCart(${i})" title="삭제">✕</button>
+    </div>`).join('');
+  document.getElementById('cartTotalPrice').textContent='₩'+total.toLocaleString();
+}
+function removeCart(i){
+  cart.splice(i,1);
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  renderCartItems();
+}
+function addToCart(name,price){
+  cart.push({name,price});
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  showToast('🛒 장바구니에 담겼습니다');
+}
+function updateCartNav(){
+  const btn = document.getElementById('navCartBtn');
+  if(!btn) return;
+  if(cart.length){
+    btn.textContent='🛒 '+cart.length+'개';
+    btn.classList.add('has-items');
+  } else {
+    btn.textContent='🛒 장바구니';
+    btn.classList.remove('has-items');
+  }
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── SKELETON → PRODUCTS ──
+function hideSkeleton(){
+  document.querySelectorAll('.skel-card').forEach(el=>el.remove());
+  document.getElementById('productGrid').style.display='grid';
+}
+
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  const banner=document.getElementById('pwaBanner');
+  if(banner) banner.classList.add('visible');
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+function dismissPWA(){
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  setTimeout(hideSkeleton, 600);
+});
+
+
+// ── SEARCH + FILTER ──
+let allProducts = window.__PRODUCTS__ || [];
+let activePrice = 'all';
+let activeMargin = 'all';
+let activeSort = 'default';
+let searchQuery = '';
+
+const priceRanges = {
+  all: ()=>true,
+  u20: p=>p.price<20000,
+  u50: p=>p.price>=20000&&p.price<50000,
+  o50: p=>p.price>=50000
+};
+const marginRanges = {
+  all: ()=>true,
+  m30: p=>p.margin>=30,
+  m40: p=>p.margin>=40,
+  m45: p=>p.margin>=45
+};
+const sorters = {
+  default: (a,b)=>0,
+  price_asc: (a,b)=>a.price-b.price,
+  price_desc: (a,b)=>b.price-a.price,
+  margin: (a,b)=>b.margin-a.margin,
+  rating: (a,b)=>b.rating-a.rating
+};
+
+function applyFilters(){
+  let res = allProducts.filter(p=>{
+    const q = searchQuery.trim().toLowerCase();
+    return (!q || p.name.toLowerCase().includes(q)) &&
+           priceRanges[activePrice](p) &&
+           marginRanges[activeMargin](p);
+  });
+  res.sort(sorters[activeSort]);
+
+  const grid = document.getElementById('productGrid');
+  const cnt  = document.getElementById('resultCount');
+  if(cnt) cnt.textContent = res.length+'개';
+
+  if(!res.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>검색 결과가 없습니다</p></div>';
+    return;
+  }
+  grid.innerHTML = res.map(p=>{
+    const badge = p.badge ? `<span class="card-badge">${p.badge}</span>` : '';
+    return `<div class="card" onclick="location.href='product-${p.slug||p.id}.html'" >
+      ${badge}
+      <div class="card-img-wrap">
+        <img class="card-img" src="${p.image}" alt="${p.name}" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">₩${p.price.toLocaleString()}</div>
+        <div class="card-meta">
+          <span class="card-margin">마진 ${p.margin}%</span>
+          <span class="card-rating">⭐ ${p.rating}</span>
+        </div>
+        <button class="card-btn" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g,"\'")}',${p.price})">장바구니 담기</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setPrice(v,el){
+  activePrice=v;
+  document.querySelectorAll('.fp').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setMargin(v,el){
+  activeMargin=v;
+  document.querySelectorAll('.fm').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setSort(v){ activeSort=v; applyFilters(); }
+function setSearch(v){ searchQuery=v; applyFilters(); }
+
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  applyFilters();
+});
+
+</script>
+</body>
+</html>

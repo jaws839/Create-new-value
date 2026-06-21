@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 관리자 대시보드</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--bg2:#0d0d12;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--gold2:#d4b97a;--text:#F5F5F7;--muted:#888;--ok:#4caf92;--err:#e57373;--warn:#ffb74d;--blue:#64b5f6}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100svh}
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:1.5rem;display:flex;flex-direction:column;gap:.4rem;position:sticky;top:0;height:100svh}
+.sidebar-logo{font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:.15em;margin-bottom:1.2rem}
+.sidebar-label{font-size:.65rem;color:var(--muted);letter-spacing:.12em;font-weight:700;text-transform:uppercase;margin:1rem 0 .4rem;padding:0 .5rem}
+.nav-item{padding:.6rem .75rem;border-radius:10px;font-size:.82rem;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:.6rem;color:var(--muted)}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:rgba(200,169,107,.12);color:var(--gold);font-weight:600}
+.sidebar-footer{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+.logout-btn{width:100%;background:none;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:.55rem;font-size:.78rem;cursor:pointer;font-family:inherit;transition:.2s}
+.logout-btn:hover{border-color:var(--err);color:var(--err)}
+/* MAIN */
+.main{padding:2rem;overflow-y:auto}
+.page-title{font-size:1.2rem;font-weight:900;margin-bottom:.3rem}
+.page-sub{font-size:.78rem;color:var(--muted);margin-bottom:2rem}
+.panel{display:none}.panel.active{display:block}
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.3rem}
+.kpi-label{font-size:.72rem;color:var(--muted);margin-bottom:.4rem;font-weight:600}
+.kpi-val{font-size:1.7rem;font-weight:900;color:var(--gold)}
+.kpi-change{font-size:.7rem;margin-top:.3rem}
+.kpi-change.up{color:var(--ok)}.kpi-change.down{color:var(--err)}
+/* TABLE */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-hd{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.table-title{font-size:.88rem;font-weight:700}
+.table-search{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.4rem .85rem;font-size:.78rem;outline:none;font-family:inherit;transition:.2s}
+.table-search:focus{border-color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{padding:.8rem 1rem;text-align:left;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.status-chip{display:inline-block;font-size:.67rem;font-weight:700;padding:.18rem .6rem;border-radius:100px}
+.s-complete{background:rgba(76,175,146,.15);color:var(--ok)}
+.s-ship{background:rgba(100,181,246,.15);color:var(--blue)}
+.s-pending{background:rgba(255,183,77,.15);color:var(--warn)}
+.s-cancel{background:rgba(229,115,115,.15);color:var(--err)}
+.status-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.25rem .5rem;font-size:.73rem;cursor:pointer;font-family:inherit}
+/* PRODUCT PANEL */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.9rem;margin-top:1rem}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.2s}
+.prod-card:hover{border-color:rgba(200,169,107,.3)}
+.prod-img{width:100%;aspect-ratio:1;object-fit:cover;background:#111}
+.prod-body{padding:.85rem}
+.prod-name{font-size:.8rem;font-weight:500;margin-bottom:.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-price{font-size:.85rem;font-weight:700;color:var(--gold)}
+.prod-margin{font-size:.68rem;color:var(--ok);margin-top:.18rem}
+.prod-cat{font-size:.65rem;color:var(--muted)}
+.tab-row{display:flex;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.tab-chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.35rem .85rem;font-size:.75rem;cursor:pointer;transition:.2s;font-family:inherit}
+.tab-chip:hover{border-color:var(--gold-dim,#9a7d4f);color:var(--text)}
+.tab-chip.active{background:rgba(200,169,107,.14);border-color:var(--gold);color:var(--gold);font-weight:600}
+/* LOADING */
+.loading-box{text-align:center;padding:3rem;color:var(--muted);font-size:.86rem}
+.gate{display:flex;align-items:center;justify-content:center;min-height:100svh;flex-direction:column;gap:1.2rem;padding:2rem;text-align:center}
+.gate-icon{font-size:3rem}
+.gate-title{font-size:1.3rem;font-weight:700}
+.gate-sub{font-size:.84rem;color:var(--muted);max-width:320px}
+.gate-btn{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.8rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+.gate-btn:hover{background:var(--gold2)}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.sidebar{display:none}.kpi-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="gateView" class="gate">
+  <div class="gate-icon">🔐</div>
+  <div class="gate-title">관리자 인증 필요</div>
+  <div class="gate-sub">관리자 이메일로 로그인 후 접근 가능합니다</div>
+  <button class="gate-btn" onclick="location.href='auth.html'">관리자 로그인</button>
+</div>
+
+<div id="adminApp" style="display:none">
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">MIRU</div>
+    <div class="sidebar-label">메뉴</div>
+    <div class="nav-item active" onclick="showPanel('dashboard',this)">📊 대시보드</div>
+    <div class="nav-item" onclick="showPanel('orders',this)">📋 주문 관리</div>
+    <div class="nav-item" onclick="showPanel('products',this)">📦 제품 목록</div>
+    <div class="nav-item" onclick="location.href='index.html'">🏠 스토어 보기</div>
+    <div class="sidebar-footer">
+      <div id="adminEmail" style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem;padding:0 .3rem"></div>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">대시보드</div>
+      <div class="page-sub" id="dashDate"></div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">총 주문</div><div class="kpi-val" id="kpiOrders">-</div><div class="kpi-change up" id="kpiOrdersChange"></div></div>
+        <div class="kpi"><div class="kpi-label">총 매출</div><div class="kpi-val" id="kpiRevenue">-</div><div class="kpi-change up" id="kpiRevChange"></div></div>
+        <div class="kpi"><div class="kpi-label">결제 완료</div><div class="kpi-val" id="kpiComplete">-</div></div>
+        <div class="kpi"><div class="kpi-label">오늘 주문</div><div class="kpi-val" id="kpiToday">-</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-hd"><span class="table-title">최근 주문 10건</span></div>
+        <div id="recentOrdersTable"><div class="loading-box">데이터 불러오는 중...</div></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="panel" id="panel-orders">
+      <div class="page-title">주문 관리</div>
+      <div class="page-sub">전체 주문 내역 및 배송 상태 관리</div>
+      <div class="table-card">
+        <div class="table-hd">
+          <span class="table-title">전체 주문</span>
+          <input class="table-search" type="search" placeholder="주문번호, 고객명 검색..." oninput="filterOrders(this.value)" id="orderSearch">
+        </div>
+        <div id="ordersTable"><div class="loading-box">주문 데이터 불러오는 중...</div></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="panel" id="panel-products">
+      <div class="page-title">제품 목록</div>
+      <div class="page-sub">220개 제품 · 4개 카테고리</div>
+      <div class="tab-row">
+        <button class="tab-chip active" onclick="filterProds('all',this)">전체</button>
+        <button class="tab-chip" onclick="filterProds('beauty',this)">💄 뷰티</button>
+        <button class="tab-chip" onclick="filterProds('lifestyle',this)">🏡 라이프</button>
+        <button class="tab-chip" onclick="filterProds('pet',this)">🐾 반려동물</button>
+        <button class="tab-chip" onclick="filterProds('sports',this)">⚽ 스포츠</button>
+      </div>
+      <div class="prod-grid" id="prodGrid"><div class="loading-box">제품 데이터 불러오는 중...</div></div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyA-0D07ctDzrLWxLAmgPJ-OfOaDBaJOeno",authDomain:"miru-3806d.firebaseapp.com",projectId:"miru-3806d",storageBucket:"miru-3806d.firebasestorage.app",messagingSenderId:"958166030740",appId:"1:958166030740:web:b5dc0bc7dbfff534335781",measurementId:"G-X9H839X893"};
+const ADMIN_EMAILS=["jaws839@gmail.com"];
+
+let db=null,allOrders=[],allProds=[];
+
+function initFb(){firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();}
+function isAdmin(email){return ADMIN_EMAILS.includes(email);}
+
+async function boot(){
+  const savedUser=JSON.parse(sessionStorage.getItem('miru_user')||'null');
+  if(!savedUser||!isAdmin(savedUser.email)){document.getElementById('gateView').style.display='flex';return;}
+
+  initFb();
+  document.getElementById('gateView').style.display='none';
+  document.getElementById('adminApp').style.display='block';
+  document.getElementById('adminEmail').textContent=savedUser.email;
+  document.getElementById('dashDate').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+  await Promise.all([loadOrders(),loadProducts()]);
+  renderDashboard();
+  renderOrdersTable(allOrders);
+}
+
+async function loadOrders(){
+  try{
+    const snap=await db.collection('orders').orderBy('createdAt','desc').limit(100).get();
+    allOrders=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){allOrders=getMockOrders();console.warn('Firestore 없음, 목업 데이터 사용');}
+}
+async function loadProducts(){
+  try{const r=await fetch('data/products.json');const d=await r.json();allProds=d.products;}catch(e){allProds=[];}
+  renderProducts('all');
+}
+function getMockOrders(){
+  return Array.from({length:8},(_,i)=>({id:'MIRU-TEST-'+String(i+1).padStart(4,'0'),orderName:['미니 LED 마스크','아이스 넥쿨러 외 2개','자동 급수기','요가매트 세트','페이셜 롤러','목걸이형 선풍기','근막 마사지 건','스마트워치'][i],amount:[89900,68700,29900,52800,29900,28900,59900,89900][i],status:['결제완료','배송중','배송완료','결제완료','배송중','결제완료','배송완료','결제완료'][i],userEmail:'test@example.com',createdAt:{toDate:()=>new Date(Date.now()-i*86400000*2)}}));
+}
+
+function renderDashboard(){
+  const total=allOrders.reduce((s,o)=>s+o.amount,0);
+  const complete=allOrders.filter(o=>o.status==='결제완료'||o.status==='배송중'||o.status==='배송완료').length;
+  const today=allOrders.filter(o=>{const d=o.createdAt?.toDate?.();return d&&d.toDateString()===new Date().toDateString();}).length;
+  document.getElementById('kpiOrders').textContent=allOrders.length;
+  document.getElementById('kpiRevenue').textContent='₩'+(total/10000).toFixed(0)+'만';
+  document.getElementById('kpiComplete').textContent=complete;
+  document.getElementById('kpiToday').textContent=today;
+  const rows=allOrders.slice(0,10).map(o=>orderRow(o)).join('');
+  document.getElementById('recentOrdersTable').innerHTML=orderTable(rows);
+}
+
+function orderRow(o){
+  const date=o.createdAt?.toDate?o.createdAt.toDate().toLocaleDateString('ko-KR'):'';
+  const cls={결제완료:'s-complete',배송중:'s-ship',배송완료:'s-complete',취소:'s-cancel',대기중:'s-pending'}[o.status]||'s-pending';
+  return `<tr>
+    <td style="font-family:monospace;font-size:.7rem">${(o.id||o.orderId||'').slice(0,20)}</td>
+    <td>${o.orderName||'-'}</td>
+    <td>${o.userEmail||'-'}</td>
+    <td>₩${(o.amount||0).toLocaleString()}</td>
+    <td><span class="status-chip ${cls}">${o.status||'-'}</span></td>
+    <td><select class="status-select" onchange="updateStatus('${o.id}',this.value)"><option value="결제완료">결제완료</option><option value="배송중" ${o.status==='배송중'?'selected':''}>배송중</option><option value="배송완료" ${o.status==='배송완료'?'selected':''}>배송완료</option><option value="취소">취소</option></select></td>
+    <td>${date}</td>
+  </tr>`;
+}
+function orderTable(rows){return `<table><thead><tr><th>주문번호</th><th>상품명</th><th>이메일</th><th>금액</th><th>상태</th><th>상태변경</th><th>주문일</th></tr></thead><tbody>${rows||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">주문 내역이 없습니다</td></tr>'}</tbody></table>`;}
+
+function renderOrdersTable(orders){document.getElementById('ordersTable').innerHTML=orderTable(orders.map(orderRow).join(''));}
+function filterOrders(q){const r=allOrders.filter(o=>!q||(o.id||'').toLowerCase().includes(q.toLowerCase())||(o.orderName||'').includes(q)||(o.userEmail||'').includes(q));renderOrdersTable(r);}
+
+async function updateStatus(id,status){
+  try{await db.collection('orders').doc(id).update({status});const o=allOrders.find(x=>x.id===id);if(o)o.status=status;}
+  catch(e){alert('상태 업데이트 실패 (Firebase 설정 필요)');}
+}
+
+function renderProducts(cat){
+  const list=cat==='all'?allProds:allProds.filter(p=>p.category===cat);
+  document.getElementById('prodGrid').innerHTML=list.length?list.map(p=>`<div class="prod-card"><img class="prod-img" src="${p.image}" alt="${p.name}" loading="lazy"><div class="prod-body"><div class="prod-cat">${p.categoryName}</div><div class="prod-name">${p.name}</div><div class="prod-price">₩${p.price.toLocaleString()}</div><div class="prod-margin">마진 ${p.margin}%</div></div></div>`).join(''):'<div class="loading-box">제품 없음</div>';
+}
+function filterProds(cat,el){document.querySelectorAll('.tab-chip').forEach(e=>e.classList.remove('active'));el.classList.add('active');renderProducts(cat);}
+
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+function doLogout(){sessionStorage.removeItem('miru_user');location.href='index.html';}
+
+boot();
+</script>
+</body>
+</html>

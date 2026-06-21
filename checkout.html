@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 결제</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://js.tosspayments.com/v1/payment"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--bg2:#0d0d12;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--gold2:#d4b97a;--text:#F5F5F7;--muted:#888;--err:#e57373;--ok:#4caf92;--radius:16px}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh}
+nav{background:rgba(7,7,10,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:.15em;margin-right:auto}
+.nav-back{background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.35rem .85rem;font-size:.77rem;cursor:pointer;font-family:inherit;transition:.2s}
+.nav-back:hover{border-color:var(--gold);color:var(--gold)}
+.checkout-wrap{max-width:1000px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:1fr 400px;gap:2rem;align-items:start}
+/* LEFT: FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.8rem}
+.form-card-title{font-size:1rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-grid.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:.4rem}
+.form-label{font-size:.74rem;color:var(--muted);font-weight:600}
+.form-input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:.68rem .95rem;font-size:.86rem;outline:none;font-family:inherit;transition:.2s}
+.form-input:focus{border-color:var(--gold);background:rgba(200,169,107,.04)}
+.form-input::placeholder{color:var(--muted2,#555)}
+.section-gap{margin-top:1.5rem}
+/* PAYMENT METHODS */
+.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.5rem}
+.pay-method{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:.7rem .5rem;text-align:center;cursor:pointer;transition:.2s;font-size:.75rem;color:var(--muted)}
+.pay-method:hover{border-color:var(--gold-dim,#9a7d4f);color:var(--text)}
+.pay-method.selected{border-color:var(--gold);background:rgba(200,169,107,.1);color:var(--gold);font-weight:700}
+.pay-icon{font-size:1.2rem;display:block;margin-bottom:.25rem}
+/* RIGHT: ORDER SUMMARY */
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.8rem;position:sticky;top:80px}
+.summary-title{font-size:1rem;font-weight:700;margin-bottom:1.2rem}
+.order-items{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem;max-height:280px;overflow-y:auto}
+.order-item{display:flex;align-items:center;gap:.8rem;padding:.7rem;background:rgba(255,255,255,.03);border-radius:11px}
+.order-item-img{width:44px;height:44px;border-radius:9px;object-fit:cover;background:#111;flex-shrink:0}
+.order-item-info{flex:1;min-width:0}
+.order-item-name{font-size:.78rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-item-qty{font-size:.7rem;color:var(--muted);margin-top:.15rem}
+.order-item-price{font-size:.82rem;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0}
+.summary-divider{border:none;border-top:1px solid var(--border);margin:.8rem 0}
+.summary-row{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.5rem}
+.summary-row.total{font-size:1rem;font-weight:700;margin-bottom:1.2rem}
+.summary-row.total span:last-child{color:var(--gold);font-size:1.1rem}
+.pay-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:13px;padding:.95rem;font-size:.95rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.pay-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.pay-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.empty-cart{text-align:center;padding:5rem 2rem;color:var(--muted)}
+.empty-cart p{font-size:1.1rem;margin-bottom:1rem}
+.empty-cart button{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.75rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit}
+.toast{position:fixed;bottom:2rem;right:1.5rem;padding:.65rem 1.2rem;border-radius:12px;font-size:.82rem;z-index:9999;transition:.3s;transform:translateY(120px);opacity:0;max-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.loading-spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.checkout-wrap{grid-template-columns:1fr}.summary-card{position:static}.form-grid{grid-template-columns:1fr}.pay-methods{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">MIRU</span>
+  <button class="nav-back" onclick="history.back()">← 쇼핑 계속</button>
+</nav>
+
+<div id="mainContent"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyA-0D07ctDzrLWxLAmgPJ-OfOaDBaJOeno",authDomain:"miru-3806d.firebaseapp.com",projectId:"miru-3806d",storageBucket:"miru-3806d.firebasestorage.app",messagingSenderId:"958166030740",appId:"1:958166030740:web:b5dc0bc7dbfff534335781",measurementId:"G-X9H839X893"};
+const TOSS_CLIENT_KEY="test_ck_YOUR_CLIENT_KEY";
+const ADMIN_EMAILS=["jaws839@gmail.com"];
+
+let fbReady=false,db=null,auth=null;
+function initFb(){if(fbReady)return;firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.firestore();fbReady=true;}
+
+let cart=JSON.parse(sessionStorage.getItem('miru_cart')||'[]');
+let selectedPay='카드';
+
+function cartTotal(){return cart.reduce((s,i)=>s+i.price*(i.qty||1),0);}
+
+function renderCheckout(){
+  const main=document.getElementById('mainContent');
+  if(!cart.length){
+    main.innerHTML=`<div class="empty-cart"><p>🛒 장바구니가 비어있습니다</p><button onclick="location.href='index.html'">쇼핑하러 가기</button></div>`;
+    return;
+  }
+  const total=cartTotal();
+  const fee=total>=50000?0:3000;
+  const finalTotal=total+fee;
+
+  main.innerHTML=`<div class="checkout-wrap">
+    <div>
+      <!-- 배송 정보 -->
+      <div class="form-card">
+        <div class="form-card-title">📦 배송 정보</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">이름 *</label><input class="form-input" id="rcvName" placeholder="수령인 이름" required></div>
+          <div class="form-group"><label class="form-label">연락처 *</label><input class="form-input" id="rcvPhone" placeholder="010-0000-0000" type="tel"></div>
+        </div>
+        <div class="form-grid full section-gap">
+          <div class="form-group"><label class="form-label">우편번호</label><input class="form-input" id="rcvZip" placeholder="우편번호" readonly style="cursor:pointer" onclick="searchAddress()"><small style="font-size:.7rem;color:var(--muted);margin-top:.3rem;display:block">클릭하여 주소 검색</small></div>
+          <div class="form-group"><label class="form-label">주소 *</label><input class="form-input" id="rcvAddr" placeholder="주소"></div>
+          <div class="form-group"><label class="form-label">상세주소</label><input class="form-input" id="rcvAddrDetail" placeholder="상세주소 (동, 호수 등)"></div>
+        </div>
+        <div class="form-grid full section-gap">
+          <div class="form-group"><label class="form-label">배송 요청사항</label><input class="form-input" id="rcvNote" placeholder="예: 문 앞에 놓아주세요"></div>
+        </div>
+      </div>
+
+      <!-- 결제 수단 -->
+      <div class="form-card section-gap">
+        <div class="form-card-title">💳 결제 수단</div>
+        <div class="pay-methods">
+          <div class="pay-method selected" onclick="selectPay('카드',this)"><span class="pay-icon">💳</span>신용/체크카드</div>
+          <div class="pay-method" onclick="selectPay('카카오페이',this)"><span class="pay-icon">💛</span>카카오페이</div>
+          <div class="pay-method" onclick="selectPay('토스페이',this)"><span class="pay-icon">💙</span>토스페이</div>
+          <div class="pay-method" onclick="selectPay('네이버페이',this)"><span class="pay-icon">💚</span>네이버페이</div>
+          <div class="pay-method" onclick="selectPay('무통장입금',this)"><span class="pay-icon">🏦</span>무통장입금</div>
+          <div class="pay-method" onclick="selectPay('휴대폰',this)"><span class="pay-icon">📱</span>휴대폰결제</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="summary-card">
+      <div class="summary-title">주문 내역</div>
+      <div class="order-items">
+        ${cart.map(item=>`<div class="order-item">
+          <img class="order-item-img" src="https://picsum.photos/seed/${encodeURIComponent(item.name)}/100/100" alt="${item.name}">
+          <div class="order-item-info"><div class="order-item-name">${item.name}</div><div class="order-item-qty">수량: ${item.qty||1}개</div></div>
+          <div class="order-item-price">₩${(item.price*(item.qty||1)).toLocaleString()}</div>
+        </div>`).join('')}
+      </div>
+      <hr class="summary-divider">
+      <div class="summary-row"><span>상품금액</span><span>₩${total.toLocaleString()}</span></div>
+      <div class="summary-row"><span>배송비</span><span>${fee===0?'<span style="color:var(--ok)">무료</span>':'₩'+fee.toLocaleString()}</span></div>
+      ${fee>0?`<div style="font-size:.7rem;color:var(--muted);margin:-3px 0 8px;text-align:right">₩50,000 이상 무료배송</div>`:''}
+      <hr class="summary-divider">
+      <div class="summary-row total"><span>최종 결제금액</span><span>₩${finalTotal.toLocaleString()}</span></div>
+      <button class="pay-btn" id="payBtn" onclick="doPayment(${finalTotal})">₩${finalTotal.toLocaleString()} 결제하기</button>
+      <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.8rem">토스페이먼츠 보안 결제 · SSL 암호화</p>
+    </div>
+  </div>`;
+}
+
+function selectPay(method,el){
+  selectedPay=method;
+  document.querySelectorAll('.pay-method').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function searchAddress(){
+  showToast('카카오 주소검색 API 연동 후 사용 가능합니다');
+  // 실사용시: new daum.Postcode({oncomplete: function(data){...}}).open();
+  document.getElementById('rcvAddr').value='서울특별시 강남구 테헤란로 123';
+  document.getElementById('rcvZip').value='06234';
+}
+
+async function doPayment(amount){
+  const name=document.getElementById('rcvName')?.value.trim();
+  const phone=document.getElementById('rcvPhone')?.value.trim();
+  const addr=document.getElementById('rcvAddr')?.value.trim();
+  if(!name||!phone||!addr){showToast('배송 정보를 모두 입력해주세요','error');return;}
+
+  const btn=document.getElementById('payBtn');
+  btn.disabled=true;btn.innerHTML='<span class="loading-spin"></span>결제 창 열기...';
+
+  const orderId='MIRU-'+Date.now()+'-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  const orderName=cart.length===1?cart[0].name:cart[0].name+' 외 '+(cart.length-1)+'개';
+
+  // 주문 정보 임시 저장 (결제 성공 시 Firebase에 저장)
+  sessionStorage.setItem('miru_pending_order',JSON.stringify({orderId,amount,orderName,cart,delivery:{name,phone,addr,addrDetail:document.getElementById('rcvAddrDetail')?.value||'',note:document.getElementById('rcvNote')?.value||''}}));
+
+  try{
+    const toss=TossPayments(TOSS_CLIENT_KEY);
+    await toss.requestPayment(selectedPay,{
+      amount,orderId,orderName,
+      customerName:name,customerMobilePhone:phone.replace(/-/g,''),
+      successUrl:location.origin+location.pathname.replace('checkout.html','')+'payment-success.html',
+      failUrl:location.origin+location.pathname.replace('checkout.html','')+'payment-fail.html',
+    });
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='₩'+amount.toLocaleString()+' 결제하기';
+    if(e.code==='USER_CANCEL'){showToast('결제가 취소되었습니다');return;}
+    showToast('결제 오류: '+e.message,'error');
+  }
+}
+
+function showToast(msg,type='info'){const el=document.getElementById('toast');const bg={info:'rgba(200,169,107,.95)',success:'rgba(76,175,146,.95)',error:'rgba(229,115,115,.95)'};el.style.background=bg[type]||bg.info;el.style.color=type==='info'?'#000':'#fff';el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
+
+renderCheckout();
+</script>
+</body>
+</html>

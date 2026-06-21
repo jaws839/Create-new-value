@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 결제 완료</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--text:#F5F5F7;--muted:#888;--ok:#4caf92}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.card{background:rgba(13,13,18,.9);border:1px solid var(--border);border-radius:24px;padding:3rem 2.5rem;max-width:480px;width:100%;text-align:center;backdrop-filter:blur(12px)}
+.success-icon{font-size:4rem;margin-bottom:1.2rem;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.success-title{font-size:1.5rem;font-weight:900;margin-bottom:.5rem}
+.success-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+.order-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:2rem;text-align:left}
+.order-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.5rem}
+.order-row:last-child{margin-bottom:0}
+.order-row .val{font-weight:700;color:var(--gold)}
+.btn-group{display:flex;gap:.7rem;flex-direction:column}
+.btn-gold{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.8rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-gold:hover{background:#d4b97a}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);border-radius:12px;padding:.8rem;font-size:.88rem;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="success-icon">✅</div>
+  <div class="success-title">결제가 완료되었습니다!</div>
+  <div class="success-sub">주문해주셔서 감사합니다.<br>3~5 영업일 내 배송될 예정입니다.</div>
+  <div class="order-box" id="orderBox">
+    <div class="order-row"><span>주문번호</span><span class="val" id="orderId">-</span></div>
+    <div class="order-row"><span>결제금액</span><span class="val" id="orderAmt">-</span></div>
+    <div class="order-row"><span>결제수단</span><span class="val" id="orderMethod">-</span></div>
+  </div>
+  <div class="btn-group">
+    <button class="btn-gold" onclick="location.href='mypage.html'">주문 내역 확인</button>
+    <button class="btn-ghost" onclick="location.href='index.html'">쇼핑 계속하기</button>
+  </div>
+</div>
+
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyA-0D07ctDzrLWxLAmgPJ-OfOaDBaJOeno",authDomain:"miru-3806d.firebaseapp.com",projectId:"miru-3806d",storageBucket:"miru-3806d.firebasestorage.app",messagingSenderId:"958166030740",appId:"1:958166030740:web:b5dc0bc7dbfff534335781",measurementId:"G-X9H839X893"};
+
+(async function(){
+  // URL params from Toss
+  const params=new URLSearchParams(location.search);
+  const paymentKey=params.get('paymentKey');
+  const orderId=params.get('orderId')||'';
+  const amount=params.get('amount')||'0';
+
+  document.getElementById('orderId').textContent=orderId.slice(0,20)+'...';
+  document.getElementById('orderAmt').textContent='₩'+Number(amount).toLocaleString();
+  document.getElementById('orderMethod').textContent=params.get('paymentType')||'카드';
+
+  // ── Firestore에 주문 저장 ──
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const db=firebase.firestore();
+    const auth=firebase.auth();
+    const pending=JSON.parse(sessionStorage.getItem('miru_pending_order')||'{}');
+    const user=JSON.parse(sessionStorage.getItem('miru_user')||'{}');
+    await db.collection('orders').doc(orderId).set({
+      orderId,paymentKey,amount:Number(amount),
+      orderName:pending.orderName||'MIRU 주문',
+      cart:pending.cart||[],
+      delivery:pending.delivery||{},
+      userId:user.uid||'guest',
+      userEmail:user.email||'',
+      status:'결제완료',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    sessionStorage.removeItem('miru_pending_order');
+    sessionStorage.removeItem('miru_cart');
+  }catch(e){console.warn('Firestore 저장 실패 (Firebase 설정 필요):',e.message);}
+})();
+</script>
+</body>
+</html>

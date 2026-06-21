@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>MIRU | 로그인 / 회원가입</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070A;--surface:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--gold:#C8A96B;--gold2:#d4b97a;--text:#F5F5F7;--muted:#888;--err:#e57373;--ok:#4caf92;--radius:16px}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 20%,rgba(200,169,107,.07),transparent),radial-gradient(ellipse 60% 60% at 70% 80%,rgba(200,169,107,.05),transparent);z-index:0}
+.back-btn{position:fixed;top:1.2rem;left:1.5rem;background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.36rem .85rem;font-size:.77rem;cursor:pointer;transition:.2s;font-family:inherit;z-index:10}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+.card{background:rgba(13,13,18,.9);border:1px solid var(--border);border-radius:24px;padding:2.5rem;width:100%;max-width:420px;position:relative;z-index:1;backdrop-filter:blur(12px)}
+.logo{font-size:1.6rem;font-weight:900;color:var(--gold);letter-spacing:.18em;text-align:center;margin-bottom:.4rem}
+.tagline{text-align:center;font-size:.75rem;color:var(--muted);margin-bottom:2rem}
+.tabs{display:flex;background:var(--surface);border-radius:12px;padding:.3rem;margin-bottom:2rem;gap:.3rem}
+.tab{flex:1;padding:.6rem;border:none;background:none;color:var(--muted);border-radius:9px;font-size:.85rem;cursor:pointer;transition:.2s;font-family:inherit;font-weight:500}
+.tab.active{background:var(--gold);color:#000;font-weight:700}
+.form-group{margin-bottom:1.1rem}
+.form-label{font-size:.75rem;color:var(--muted);margin-bottom:.4rem;display:block;font-weight:600}
+.form-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:.72rem 1rem;font-size:.88rem;outline:none;font-family:inherit;transition:.2s}
+.form-input:focus{border-color:var(--gold);background:rgba(200,169,107,.05)}
+.form-input::placeholder{color:var(--muted)}
+.form-input.err{border-color:var(--err)}
+.err-msg{font-size:.73rem;color:var(--err);margin-top:.35rem;display:none}
+.err-msg.show{display:block}
+.submit-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;padding:.85rem;font-size:.92rem;font-weight:700;cursor:pointer;transition:.25s;font-family:inherit;margin-top:.5rem}
+.submit-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.divider{display:flex;align-items:center;gap:.8rem;margin:1.2rem 0;color:var(--muted);font-size:.75rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.google-btn{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:.75rem;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.google-btn:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.07)}
+.google-icon{width:18px;height:18px}
+.form-panel{display:none}.form-panel.active{display:block}
+.toast{position:fixed;bottom:2rem;right:1.5rem;padding:.65rem 1.2rem;border-radius:12px;font-size:.82rem;z-index:9999;transition:.3s;transform:translateY(120px);opacity:0;max-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.loading{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+
+<div class="card">
+  <div class="logo">MIRU</div>
+  <div class="tagline">일상의 아름다움을 발견하는 스토어</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">로그인</button>
+    <button class="tab" onclick="switchTab('signup')">회원가입</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="form-panel active" id="loginPanel">
+    <div class="form-group">
+      <label class="form-label">이메일</label>
+      <input class="form-input" type="email" id="loginEmail" placeholder="example@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호</label>
+      <input class="form-input" type="password" id="loginPw" placeholder="비밀번호 입력" autocomplete="current-password">
+      <div class="err-msg" id="loginErr"></div>
+    </div>
+    <button class="submit-btn" id="loginBtn" onclick="doLogin()">로그인</button>
+    <div class="divider">또는</div>
+    <button class="google-btn" onclick="doGoogle()">
+      <svg class="google-icon" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.4 30.2 0 24 0 14.7 0 6.7 5.5 2.7 13.5l7.8 6C12.3 13 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.9 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.9c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.3-10.1 7.3-17z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3.1-.8-4.8s.3-3.3.8-4.8l-7.8-6C1 16.3 0 20 0 24s1 7.7 2.7 11.1l7.8-6.6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.7 2.3-6.3 0-11.7-4.3-13.5-10l-7.8 6C6.7 42.5 14.7 48 24 48z"/></svg>
+      Google로 계속하기
+    </button>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="form-panel" id="signupPanel">
+    <div class="form-group">
+      <label class="form-label">이름</label>
+      <input class="form-input" type="text" id="signupName" placeholder="이름 입력" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">이메일</label>
+      <input class="form-input" type="email" id="signupEmail" placeholder="example@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호 (8자 이상)</label>
+      <input class="form-input" type="password" id="signupPw" placeholder="비밀번호 입력" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호 확인</label>
+      <input class="form-input" type="password" id="signupPw2" placeholder="비밀번호 재입력" autocomplete="new-password">
+      <div class="err-msg" id="signupErr"></div>
+    </div>
+    <button class="submit-btn" id="signupBtn" onclick="doSignup()">회원가입</button>
+    <div class="divider">또는</div>
+    <button class="google-btn" onclick="doGoogle()">
+      <svg class="google-icon" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.4 30.2 0 24 0 14.7 0 6.7 5.5 2.7 13.5l7.8 6C12.3 13 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.9 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.9c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.3-10.1 7.3-17z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3.1-.8-4.8s.3-3.3.8-4.8l-7.8-6C1 16.3 0 20 0 24s1 7.7 2.7 11.1l7.8-6.6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.7 2.3-6.3 0-11.7-4.3-13.5-10l-7.8 6C6.7 42.5 14.7 48 24 48z"/></svg>
+      Google로 계속하기
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Firebase 설정 (js/firebase-config.js 내용으로 교체) ──
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA-0D07ctDzrLWxLAmgPJ-OfOaDBaJOeno",
+  authDomain: "miru-3806d.firebaseapp.com",
+  projectId: "miru-3806d",
+  storageBucket: "miru-3806d.firebasestorage.app",
+  messagingSenderId: "958166030740",
+  appId: "1:958166030740:web:b5dc0bc7dbfff534335781",
+  measurementId: "G-X9H839X893"
+};
+
+let fbReady = false;
+function initFb() {
+  if (fbReady) return;
+  firebase.initializeApp(FIREBASE_CONFIG);
+  fbReady = true;
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['login','signup'][i]===t));
+  document.getElementById('loginPanel').classList.toggle('active',t==='login');
+  document.getElementById('signupPanel').classList.toggle('active',t==='signup');
+}
+
+function showErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.add('show');}
+function hideErr(id){document.getElementById(id).classList.remove('show');}
+function setLoading(btnId,on){const b=document.getElementById(btnId);b.disabled=on;b.innerHTML=on?'<span class="loading"></span>처리 중...':b._orig||(b._orig=b.innerHTML);}
+
+async function doLogin(){
+  initFb();hideErr('loginErr');
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  if(!email||!pw){showErr('loginErr','이메일과 비밀번호를 입력해주세요');return;}
+  setLoading('loginBtn',true);
+  try{
+    const cred=await firebase.auth().signInWithEmailAndPassword(email,pw);
+    onSuccess(cred.user);
+  }catch(e){
+    setLoading('loginBtn',false);
+    const msgs={
+      'auth/user-not-found':'등록되지 않은 이메일입니다',
+      'auth/wrong-password':'비밀번호가 올바르지 않습니다',
+      'auth/too-many-requests':'너무 많은 시도. 잠시 후 다시 시도해주세요',
+      'auth/invalid-email':'올바른 이메일 형식이 아닙니다',
+      'auth/invalid-credential':'이메일 또는 비밀번호가 올바르지 않습니다'
+    };
+    showErr('loginErr', msgs[e.code]||('오류: '+e.message));
+  }
+}
+
+async function doSignup(){
+  initFb();hideErr('signupErr');
+  const name=document.getElementById('signupName').value.trim();
+  const email=document.getElementById('signupEmail').value.trim();
+  const pw=document.getElementById('signupPw').value;
+  const pw2=document.getElementById('signupPw2').value;
+  if(!name){showErr('signupErr','이름을 입력해주세요');return;}
+  if(!email){showErr('signupErr','이메일을 입력해주세요');return;}
+  if(pw.length<8){showErr('signupErr','비밀번호는 8자 이상이어야 합니다');return;}
+  if(pw!==pw2){showErr('signupErr','비밀번호가 일치하지 않습니다');return;}
+  setLoading('signupBtn',true);
+  try{
+    const cred=await firebase.auth().createUserWithEmailAndPassword(email,pw);
+    await cred.user.updateProfile({displayName:name});
+    onSuccess(cred.user);
+  }catch(e){
+    setLoading('signupBtn',false);
+    const msgs={'auth/email-already-in-use':'이미 사용 중인 이메일입니다','auth/invalid-email':'올바른 이메일 형식이 아닙니다','auth/weak-password':'비밀번호가 너무 간단합니다'};
+    showErr('signupErr', msgs[e.code]||('오류: '+e.message));
+  }
+}
+
+async function doGoogle(){
+  initFb();
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    const cred=await firebase.auth().signInWithPopup(provider);
+    onSuccess(cred.user);
+  }catch(e){
+    if(e.code==='auth/popup-closed-by-user')return;
+    showToast('Google 로그인 실패: '+e.message,'error');
+  }
+}
+
+function onSuccess(user){
+  sessionStorage.setItem('miru_user',JSON.stringify({
+    uid:user.uid,email:user.email,displayName:user.displayName||'',
+    photoURL:user.photoURL||''
+  }));
+  showToast('✅ 환영합니다, '+(user.displayName||user.email.split('@')[0])+'님!','success');
+  setTimeout(()=>location.href='index.html',1200);
+}
+
+function showToast(msg,type='info'){
+  const el=document.getElementById('toast');
+  const bg={info:'rgba(200,169,107,.95)',success:'rgba(76,175,146,.95)',error:'rgba(229,115,115,.95)'};
+  el.style.background=bg[type]||bg.info;el.style.color=type==='info'?'#000':'#fff';
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// Enter key support
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const panel=document.querySelector('.form-panel.active');if(panel.id==='loginPanel')doLogin();else doSignup();}});
+</script>
+</body>
+</html>

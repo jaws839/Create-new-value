@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="theme-color" content="#C8A96B">
+  <title>MIRU | 일상의 아름다움을 발견하는 라이프스타일 스토어</title>
+  <meta name="description" content="엄선된 220개+ 프리미엄 제품 · 뷰티, 라이프스타일, 반려동물, 스포츠 · 당신의 일상을 더 아름답게 만드는 라이프스타일 스토어">
+  <meta property="og:title" content="MIRU 라이프스타일 스토어">
+  <meta property="og:description" content="일상의 아름다움을 발견하는 프리미엄 라이프스타일 스토어">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070A;--bg2:#0d0d12;
+  --surface:rgba(255,255,255,0.042);--surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --gold:#C8A96B;--gold2:#d4b97a;--gold-dim:#9a7d4f;
+  --text:#F5F5F7;--muted:#888;--muted2:#555;--green:#4caf92;
+  --radius:18px
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:1rem 2rem;display:flex;align-items:center;gap:.8rem;transition:.4s}
+nav.scrolled{background:rgba(7,7,10,.94);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:.75rem 2rem}
+.nav-logo{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:.18em;margin-right:auto}
+.nav-links{display:flex;gap:.3rem}
+.nav-links a{padding:.36rem .88rem;border-radius:100px;font-size:.77rem;color:var(--muted);transition:.2s;border:1px solid transparent}
+.nav-links a:hover{color:var(--text);border-color:var(--border)}
+.nav-actions{display:flex;align-items:center;gap:.5rem}
+.nav-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:.36rem .88rem;font-size:.77rem;cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.nav-btn:hover{border-color:var(--gold-dim);color:var(--gold)}
+.nav-btn.gold{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700}
+.nav-btn.gold:hover{background:var(--gold2)}
+.cart-btn{position:relative}
+.cart-badge{position:absolute;top:-5px;right:-5px;background:var(--gold);color:#000;font-size:.6rem;font-weight:900;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center}
+.cart-badge.show{display:inline-flex}
+
+/* HERO */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 1.5rem 5rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 65% 55% at 25% 15%,rgba(200,169,107,.09),transparent),radial-gradient(ellipse 55% 55% at 75% 85%,rgba(200,169,107,.07),transparent)}
+.hero-grid{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,#000 20%,transparent 100%)}
+.hero-content{position:relative;z-index:1;max-width:800px}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;border:1px solid rgba(200,169,107,.4);background:rgba(200,169,107,.08);color:var(--gold);font-size:.71rem;font-weight:600;padding:.3rem 1rem;border-radius:100px;letter-spacing:.1em;margin-bottom:2rem;animation:fadeUp .8s ease both}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-size:clamp(2.4rem,6.5vw,5rem);font-weight:900;line-height:1.07;letter-spacing:-.02em;margin-bottom:1.2rem;animation:fadeUp .8s .15s ease both}
+.hero-title .gold{color:var(--gold)}
+.hero-title .outline{-webkit-text-stroke:1.5px var(--gold);color:transparent}
+.hero-sub{font-size:clamp(.88rem,2vw,1.05rem);color:var(--muted);line-height:1.7;max-width:480px;margin:0 auto 2.5rem;animation:fadeUp .8s .3s ease both}
+.hero-ctas{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;animation:fadeUp .8s .45s ease both}
+.btn-primary{background:var(--gold);color:#000;border:none;border-radius:14px;padding:.88rem 2.2rem;font-size:.95rem;font-weight:700;cursor:pointer;transition:.25s;font-family:inherit}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(200,169,107,.3)}
+.btn-ghost{background:none;color:var(--text);border:1px solid var(--border2);border-radius:14px;padding:.88rem 2.2rem;font-size:.95rem;cursor:pointer;transition:.25s;font-family:inherit}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+.hero-stats{display:flex;justify-content:center;gap:3rem;margin-top:4rem;animation:fadeUp .8s .6s ease both;flex-wrap:wrap}
+.stat-num{font-size:1.8rem;font-weight:900;color:var(--gold)}
+.stat-label{font-size:.68rem;color:var(--muted);letter-spacing:.09em;margin-top:.2rem}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--muted);font-size:.67rem;letter-spacing:.12em;animation:fadeUp 1s 1s ease both}
+.scroll-line{width:1px;height:40px;background:linear-gradient(var(--gold),transparent);animation:scrollAnim 1.8s ease-in-out infinite}
+@keyframes scrollAnim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* COUNTDOWN */
+.countdown-section{padding:3rem 1.5rem;text-align:center;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cd-eyebrow{font-size:.7rem;color:var(--gold);letter-spacing:.18em;font-weight:700;text-transform:uppercase;margin-bottom:1.2rem}
+.countdown-wrap{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap}
+.cd-unit{text-align:center}
+.cd-num{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:.5rem 1.3rem;display:block;min-width:82px;font-variant-numeric:tabular-nums}
+.cd-label{font-size:.67rem;color:var(--muted);margin-top:.4rem;letter-spacing:.1em}
+
+/* SECTIONS */
+.section{padding:5rem 2rem;max-width:1280px;margin:0 auto}
+.eyebrow{font-size:.7rem;color:var(--gold);letter-spacing:.18em;font-weight:700;text-transform:uppercase;margin-bottom:.6rem}
+.section-title{font-size:clamp(1.6rem,3.5vw,2.5rem);font-weight:900;line-height:1.15;margin-bottom:1rem}
+.section-title span{color:var(--gold)}
+.section-sub{font-size:.88rem;color:var(--muted);line-height:1.7}
+
+/* CAT GRID */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:2.5rem}
+.cat-card{border-radius:var(--radius);overflow:hidden;cursor:pointer;position:relative;aspect-ratio:4/3;transition:.32s;background:var(--surface);border:1px solid var(--border)}
+.cat-card:nth-child(-n+2){aspect-ratio:16/9}
+.cat-card:hover{transform:scale(1.02);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.cat-img{width:100%;height:100%;object-fit:cover;transition:.4s;filter:brightness(.65)}
+.cat-card:hover .cat-img{transform:scale(1.08);filter:brightness(.8)}
+.cat-overlay{position:absolute;inset:0;padding:1.5rem;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(transparent 25%,rgba(0,0,0,.75))}
+.cat-emoji{font-size:2rem;margin-bottom:.3rem}
+.cat-name{font-size:1.15rem;font-weight:700;margin-bottom:.2rem}
+.cat-sub{font-size:.73rem;color:rgba(255,255,255,.65)}
+.cat-arrow{position:absolute;top:1rem;right:1rem;background:rgba(200,169,107,.18);border:1px solid rgba(200,169,107,.4);color:var(--gold);border-radius:100px;padding:.28rem .7rem;font-size:.7rem;transition:.2s}
+.cat-card:hover .cat-arrow{background:var(--gold);color:#000}
+
+/* CAROUSEL */
+.carousel{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.8rem;scroll-snap-type:x mandatory;scrollbar-width:none;margin-top:2rem}
+.carousel::-webkit-scrollbar{display:none}
+.c-card{flex-shrink:0;width:210px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:.25s}
+.c-card:hover{border-color:var(--gold-dim);transform:translateY(-4px);box-shadow:0 12px 40px rgba(200,169,107,.12)}
+.c-img{width:100%;aspect-ratio:1;object-fit:cover;transition:.35s}
+.c-card:hover .c-img{transform:scale(1.06)}
+.c-body{padding:.8rem}
+.c-badge{display:inline-block;background:var(--gold);color:#000;font-size:.6rem;font-weight:700;padding:.14rem .48rem;border-radius:100px;margin-bottom:.35rem}
+.c-name{font-size:.8rem;font-weight:500;line-height:1.3;margin-bottom:.35rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-price{font-size:.93rem;font-weight:700;color:var(--gold)}
+.c-margin{font-size:.65rem;color:var(--green);font-weight:700;margin-top:.18rem}
+.c-add{width:100%;margin-top:.6rem;background:rgba(200,169,107,.1);border:1px solid var(--gold-dim);color:var(--gold);border-radius:9px;padding:.38rem;font-size:.73rem;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+.c-add:hover{background:var(--gold);color:#000}
+
+/* BRAND */
+.brand-section{padding:6rem 2rem;background:linear-gradient(135deg,rgba(200,169,107,.04),transparent 50%);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.brand-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.brand-quote{font-size:clamp(1.1rem,2.5vw,1.6rem);font-weight:700;line-height:1.5;margin-bottom:1.4rem}
+.brand-quote em{color:var(--gold);font-style:normal}
+.brand-desc{font-size:.86rem;color:var(--muted);line-height:1.8;margin-bottom:2rem}
+.brand-pillars{display:flex;flex-direction:column;gap:.75rem}
+.pillar{display:flex;align-items:flex-start;gap:.85rem;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.95rem}
+.p-icon{font-size:1.3rem;flex-shrink:0}
+.p-title{font-size:.83rem;font-weight:700;margin-bottom:.22rem}
+.p-desc{font-size:.76rem;color:var(--muted);line-height:1.5}
+.brand-stats{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.b-stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center}
+.b-stat:first-child{grid-column:1/-1}
+.b-num{font-size:2.4rem;font-weight:900;color:var(--gold)}
+.b-label{font-size:.73rem;color:var(--muted);margin-top:.25rem}
+
+/* HOW IT WORKS */
+.how-section{padding:5rem 2rem;max-width:900px;margin:0 auto;text-align:center}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2.8rem}
+.how-step{position:relative}
+.how-step:not(:last-child)::after{content:'→';position:absolute;right:-.9rem;top:1.1rem;color:var(--muted);font-size:.95rem}
+.step-num{width:42px;height:42px;border-radius:50%;background:rgba(200,169,107,.12);border:1px solid rgba(200,169,107,.3);color:var(--gold);font-size:.82rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem}
+.step-title{font-size:.8rem;font-weight:700;margin-bottom:.35rem}
+.step-desc{font-size:.71rem;color:var(--muted);line-height:1.5}
+
+/* EMAIL CAPTURE */
+.email-section{padding:5rem 1.5rem;text-align:center;background:var(--bg2);border-top:1px solid var(--border)}
+.email-form{display:flex;gap:.6rem;max-width:420px;margin:2rem auto 0;flex-wrap:wrap;justify-content:center}
+.email-input{flex:1;min-width:210px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:.72rem 1.1rem;font-size:.86rem;outline:none;font-family:inherit;transition:.2s}
+.email-input:focus{border-color:var(--gold)}
+.email-input::placeholder{color:var(--muted)}
+.email-btn{background:var(--gold);color:#000;border:none;border-radius:12px;padding:.72rem 1.4rem;font-size:.86rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.email-btn:hover{background:var(--gold2)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:3rem 2rem 2rem}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.footer-logo{font-size:1.4rem;font-weight:900;color:var(--gold);letter-spacing:.15em;margin-bottom:.75rem}
+.footer-desc{font-size:.76rem;color:var(--muted);line-height:1.7;max-width:230px}
+.footer-col-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.85rem}
+.footer-col a{display:block;font-size:.76rem;color:var(--muted);margin-bottom:.48rem;transition:.2s}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:1.4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.7rem;font-size:.71rem;color:var(--muted2)}
+
+/* CART SIDEBAR */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
+.overlay.open{opacity:1;pointer-events:all}
+.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:min(400px,100vw);background:#0f0f14;border-left:1px solid var(--border);z-index:700;transform:translateX(100%);transition:.32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.cart-sidebar.open{transform:translateX(0)}
+.cart-hd{padding:1.3rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cart-hd h3{font-size:1rem;font-weight:700}
+.cart-x{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;border-radius:8px;transition:.2s}
+.cart-x:hover{color:var(--text);background:var(--surface)}
+.cart-body{flex:1;overflow-y:auto;padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:.75rem}
+.cart-empty{text-align:center;color:var(--muted);padding:3rem 0;font-size:.86rem}
+.c-item{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:.85rem;display:flex;align-items:center;gap:.8rem}
+.c-item-img{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#111;flex-shrink:0}
+.c-item-info{flex:1;min-width:0}
+.c-item-name{font-size:.79rem;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-item-price{font-size:.8rem;color:var(--gold);font-weight:700;margin-top:.2rem}
+.c-item-qty{display:flex;align-items:center;gap:.45rem;margin-top:.3rem}
+.qty-s{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:24px;height:24px;border-radius:7px;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:.2s}
+.qty-s:hover{border-color:var(--gold);color:var(--gold)}
+.qty-n{font-size:.78rem;min-width:16px;text-align:center}
+.c-item-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.83rem;padding:.2rem;transition:.2s;flex-shrink:0}
+.c-item-del:hover{color:#e57373}
+.cart-ft{padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:1rem;font-size:.9rem}
+.cart-total-num{font-weight:700;color:var(--gold);font-size:1.05rem}
+.checkout-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:13px;padding:.9rem;font-size:.92rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.checkout-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:1.5rem;padding:.65rem 1.2rem;border-radius:12px;font-size:.82rem;z-index:9999;transition:.3s;transform:translateY(120px);opacity:0;max-width:280px;line-height:1.4}
+.toast.show{transform:translateY(0);opacity:1}
+
+@media(max-width:900px){.footer-top{grid-template-columns:1fr 1fr}.brand-inner{grid-template-columns:1fr}}
+@media(max-width:640px){
+  nav{padding:.7rem 1rem}.nav-links{display:none}
+  .cat-grid{grid-template-columns:1fr}.cat-card{aspect-ratio:16/9!important}
+  .how-steps{grid-template-columns:1fr 1fr}
+  .how-step:nth-child(2)::after,.how-step:nth-child(4)::after{display:none}
+  .footer-top{grid-template-columns:1fr}
+  .footer-col:not(:first-child){display:none}
+  .section,.brand-section,.email-section{padding:3.5rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <span class="nav-logo">MIRU</span>
+  <div class="nav-links">
+    <a href="beauty.html">💄 뷰티</a>
+    <a href="lifestyle.html">🏡 라이프스타일</a>
+    <a href="pet.html">🐾 반려동물</a>
+    <a href="sports.html">⚽ 스포츠</a>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn cart-btn" onclick="openCart()">🛒 장바구니<span class="cart-badge" id="cartBadge"></span></button>
+    <button class="nav-btn" id="authNavBtn" onclick="location.href='auth.html'">로그인</button>
+    <button class="nav-btn gold" onclick="location.href='beauty.html'">쇼핑하기</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div><div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ 2026 SUMMER LAUNCH</div>
+    <h1 class="hero-title">일상을<br><span class="outline">아름답게</span><br>만드는 <span class="gold">스토어</span></h1>
+    <p class="hero-sub">뷰티 · 라이프 · 반려동물 · 스포츠<br>당신의 일상을 바꿀 220개+ 엄선 프리미엄 제품</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="location.href='beauty.html'">컬렉션 보기</button>
+      <button class="btn-ghost" onclick="document.getElementById('brandSection').scrollIntoView({behavior:'smooth'})">브랜드 스토리</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">220+</div><div class="stat-label">PRODUCTS</div></div>
+      <div><div class="stat-num">4</div><div class="stat-label">CATEGORIES</div></div>
+      <div><div class="stat-num">100%</div><div class="stat-label">CURATED</div></div>
+      <div><div class="stat-num">NEW</div><div class="stat-label">2026 SUMMER</div></div>
+    </div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div><span>SCROLL</span></div>
+</section>
+
+<!-- COUNTDOWN -->
+<div class="countdown-section">
+  <div class="cd-eyebrow">✦ 공식 런칭까지</div>
+  <div class="countdown-wrap">
+    <div class="cd-unit"><span class="cd-num" id="cdD">00</span><div class="cd-label">DAYS</div></div>
+    <div class="cd-unit"><span class="cd-num" id="cdH">00</span><div class="cd-label">HOURS</div></div>
+    <div class="cd-unit"><span class="cd-num" id="cdM">00</span><div class="cd-label">MINS</div></div>
+    <div class="cd-unit"><span class="cd-num" id="cdS">00</span><div class="cd-label">SECS</div></div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section">
+  <div class="eyebrow">COLLECTIONS</div>
+  <div class="section-title">엄선된 <span>4개 카테고리</span></div>
+  <div class="cat-grid">
+    <div class="cat-card" onclick="location.href='beauty.html'">
+      <img class="cat-img" src="https://picsum.photos/seed/beauty-col/800/450" alt="뷰티">
+      <div class="cat-overlay"><div class="cat-emoji">💄</div><div class="cat-name">뷰티</div><div class="cat-sub">LED 마스크·갈바닉·스킨케어 55개</div></div>
+      <div class="cat-arrow">→</div>
+    </div>
+    <div class="cat-card" onclick="location.href='lifestyle.html'">
+      <img class="cat-img" src="https://picsum.photos/seed/life-col/800/450" alt="라이프">
+      <div class="cat-overlay"><div class="cat-emoji">🏡</div><div class="cat-name">라이프스타일</div><div class="cat-sub">쿨링·디퓨저·스마트홈 55개</div></div>
+      <div class="cat-arrow">→</div>
+    </div>
+    <div class="cat-card" onclick="location.href='pet.html'">
+      <img class="cat-img" src="https://picsum.photos/seed/pet-col/800/450" alt="반려동물">
+      <div class="cat-overlay"><div class="cat-emoji">🐾</div><div class="cat-name">반려동물</div><div class="cat-sub">급수기·자동급식기·그루밍 55개</div></div>
+      <div class="cat-arrow">→</div>
+    </div>
+    <div class="cat-card" onclick="location.href='sports.html'">
+      <img class="cat-img" src="https://picsum.photos/seed/sport-col/800/450" alt="스포츠">
+      <div class="cat-overlay"><div class="cat-emoji">⚽</div><div class="cat-name">스포츠</div><div class="cat-sub">요가·마사지건·홈트레이닝 55개</div></div>
+      <div class="cat-arrow">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- CAROUSEL -->
+<div class="section" style="padding-top:0">
+  <div class="eyebrow">BEST PICKS</div>
+  <div class="section-title">이번 주 <span>인기 제품</span></div>
+  <div class="carousel" id="carousel"></div>
+</div>
+
+<!-- BRAND STORY -->
+<div class="brand-section" id="brandSection">
+  <div class="brand-inner">
+    <div>
+      <div class="eyebrow">BRAND STORY</div>
+      <div class="brand-quote">일상의 아름다움을<br><em>발견하는 스토어</em></div>
+      <div class="brand-desc">MIRU는 '보다(見る)'에서 영감을 받은 라이프스타일 브랜드입니다.<br><br>수많은 제품 중 진짜 좋은 것만 엄선해 소개합니다. 트렌드를 앞서가되 본질에 충실한 제품, 써보고 싶어지는 제품만 MIRU에 있습니다.</div>
+      <div class="brand-pillars">
+        <div class="pillar"><div class="p-icon">🔍</div><div><div class="p-title">엄격한 큐레이션</div><div class="p-desc">카테고리별 전문가 기준으로 품질·디자인·실용성을 모두 통과한 제품만 선별합니다.</div></div></div>
+        <div class="pillar"><div class="p-icon">✨</div><div><div class="p-title">프리미엄 라이프스타일</div><div class="p-desc">뷰티·홈·반려동물·스포츠 — 일상의 모든 순간을 더 특별하게 만드는 제품을 제안합니다.</div></div></div>
+        <div class="pillar"><div class="p-icon">🤝</div><div><div class="p-title">신뢰할 수 있는 쇼핑</div><div class="p-desc">직접 써보고 검증한 제품만 소개합니다. MIRU의 선택이 곧 보증입니다.</div></div></div>
+      </div>
+    </div>
+    <div class="brand-stats">
+      <div class="b-stat"><div class="b-num">220+</div><div class="b-label">엄선 큐레이션 제품</div></div>
+      <div class="b-stat"><div class="b-num">4</div><div class="b-label">라이프스타일 카테고리</div></div>
+      <div class="b-stat"><div class="b-num">2026</div><div class="b-label">여름 신규 론칭</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="eyebrow">HOW IT WORKS</div>
+  <div class="section-title" style="text-align:center">쇼핑 프로세스</div>
+  <div class="how-steps">
+    <div class="how-step"><div class="step-num">1</div><div class="step-title">제품 선택</div><div class="step-desc">마음에 드는 제품을 장바구니에 담으세요</div></div>
+    <div class="how-step"><div class="step-num">2</div><div class="step-title">결제</div><div class="step-desc">토스페이먼츠로 안전하게 결제</div></div>
+    <div class="how-step"><div class="step-num">3</div><div class="step-title">소싱</div><div class="step-desc">오너클랜·도매꾹 위탁 발송 요청</div></div>
+    <div class="how-step"><div class="step-num">4</div><div class="step-title">배송</div><div class="step-desc">3~5 영업일 내 직접 배송</div></div>
+  </div>
+</div>
+
+<!-- EMAIL CAPTURE -->
+<div class="email-section">
+  <div class="eyebrow" style="margin-bottom:.5rem">NEWSLETTER</div>
+  <div class="section-title">신제품 소식 <span>가장 먼저</span> 받기</div>
+  <div class="section-sub" style="text-align:center;margin:.5rem auto 0;max-width:400px">신규 드롭 알림, 한정 에디션, 특별 할인 혜택을 이메일로 받아보세요</div>
+  <div class="email-form">
+    <input class="email-input" type="email" id="emailInput" placeholder="이메일 주소 입력">
+    <button class="email-btn" onclick="subscribeEmail()">구독하기</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div><div class="footer-logo">MIRU</div><div class="footer-desc">일상의 아름다움을 발견하는<br>프리미엄 라이프스타일 스토어</div></div>
+      <div class="footer-col">
+        <div class="footer-col-title">쇼핑</div>
+        <a href="beauty.html">💄 뷰티</a><a href="lifestyle.html">🏡 라이프스타일</a>
+        <a href="pet.html">🐾 반려동물</a><a href="sports.html">⚽ 스포츠</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">고객센터</div>
+        <a href="#">자주 묻는 질문</a><a href="#">배송 안내</a>
+        <a href="#">교환·반품</a><a href="#">문의하기</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">MIRU</div>
+        <a href="#">브랜드 스토리</a><a href="mypage.html">마이페이지</a>
+        <a href="auth.html">로그인</a><a href="admin.html">관리자</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 MIRU. All rights reserved.</span>
+      <span>오더베이스 위탁판매 · 소비자보호법 준수</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-hd"><h3>🛒 장바구니 <span id="cartCntLbl" style="color:var(--muted);font-size:.8rem;font-weight:400"></span></h3><button class="cart-x" onclick="closeCart()">✕</button></div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-ft" id="cartFt" style="display:none">
+    <div class="cart-total"><span>총 결제금액</span><span class="cart-total-num" id="cartTotalAmt">₩0</span></div>
+    <button class="checkout-btn" onclick="goCheckout()">결제하기 →</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let cart=JSON.parse(sessionStorage.getItem('miru_cart')||'[]');
+function saveCart(){sessionStorage.setItem('miru_cart',JSON.stringify(cart));}
+function cartCount(){return cart.reduce((s,i)=>s+(i.qty||1),0);}
+function cartTotal(){return cart.reduce((s,i)=>s+i.price*(i.qty||1),0);}
+function updateBadge(){const n=cartCount();const b=document.getElementById('cartBadge');b.textContent=n||'';b.className='cart-badge'+(n?' show':'');}
+function addToCart(name,price,qty=1){const i=cart.findIndex(x=>x.name===name);if(i>=0)cart[i].qty=(cart[i].qty||1)+qty;else cart.push({name,price,qty});saveCart();updateBadge();renderCart();openCart();showToast('🛒 장바구니에 담겼습니다');}
+function removeFromCart(i){cart.splice(i,1);saveCart();updateBadge();renderCart();}
+function changeQty(i,d){cart[i].qty=Math.max(1,(cart[i].qty||1)+d);saveCart();updateBadge();renderCart();}
+function openCart(){document.getElementById('cartSidebar').classList.add('open');document.getElementById('overlay').classList.add('open');renderCart();}
+function closeCart(){document.getElementById('cartSidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function renderCart(){
+  const body=document.getElementById('cartBody'),ft=document.getElementById('cartFt'),cl=document.getElementById('cartCntLbl');
+  if(!cart.length){body.innerHTML='<div class="cart-empty">🛒 장바구니가 비어있습니다</div>';ft.style.display='none';cl.textContent='';return;}
+  ft.style.display='block';cl.textContent='('+cartCount()+'개)';
+  document.getElementById('cartTotalAmt').textContent='₩'+cartTotal().toLocaleString();
+  body.innerHTML=cart.map((item,i)=>`<div class="c-item"><img class="c-item-img" src="https://picsum.photos/seed/${encodeURIComponent(item.name)}/100/100" alt="${item.name}"><div class="c-item-info"><div class="c-item-name">${item.name}</div><div class="c-item-price">₩${item.price.toLocaleString()}</div><div class="c-item-qty"><button class="qty-s" onclick="changeQty(${i},-1)">−</button><span class="qty-n">${item.qty||1}</span><button class="qty-s" onclick="changeQty(${i},1)">+</button></div></div><button class="c-item-del" onclick="removeFromCart(${i})" title="삭제">✕</button></div>`).join('');
+}
+function goCheckout(){if(!cart.length){showToast('장바구니가 비어있습니다','error');return;}location.href='checkout.html';}
+function showToast(msg,type='info'){const el=document.getElementById('toast');const bg={info:'rgba(200,169,107,.95)',success:'rgba(76,175,146,.95)',error:'rgba(229,115,115,.95)'};el.style.background=bg[type]||bg.info;el.style.color=type==='info'?'#000':'#fff';el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2800);}
+function subscribeEmail(){const v=document.getElementById('emailInput').value;if(!v||!v.includes('@')){showToast('올바른 이메일을 입력해주세요','error');return;}showToast('✅ 구독 완료! 신제품 소식을 보내드릴게요');document.getElementById('emailInput').value='';}
+window.addEventListener('scroll',()=>document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>60));
+function updateCountdown(){const t=new Date('2026-07-01T00:00:00+09:00'),n=new Date(),d=t-n;if(d<=0){document.querySelector('.countdown-section').style.display='none';return;}const dd=Math.floor(d/864e5),hh=Math.floor(d%864e5/36e5),mm=Math.floor(d%36e5/6e4),ss=Math.floor(d%6e4/1e3);document.getElementById('cdD').textContent=String(dd).padStart(2,'0');document.getElementById('cdH').textContent=String(hh).padStart(2,'0');document.getElementById('cdM').textContent=String(mm).padStart(2,'0');document.getElementById('cdS').textContent=String(ss).padStart(2,'0');}
+setInterval(updateCountdown,1000);updateCountdown();
+fetch('data/products.json').then(r=>r.json()).then(d=>{const best=d.products.filter(p=>p.badge==='BEST').slice(0,12);const el=document.getElementById('carousel');el.innerHTML=best.map(p=>`<div class="c-card" onclick="location.href='product-${p.slug||p.id}.html'"><img class="c-img" src="${p.image}" alt="${p.name}" loading="lazy"><div class="c-body">${p.badge?`<span class="c-badge">${p.badge}</span>`:''}<div class="c-name">${p.name}</div><div class="c-price">₩${p.price.toLocaleString()}</div><div class="c-margin">마진 ${p.margin}%</div><button class="c-add" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g,"\\'")}',${p.price})">장바구니 담기</button></div></div>`).join('');}).catch(()=>{});
+const u=sessionStorage.getItem('miru_user');if(u){const user=JSON.parse(u);const btn=document.getElementById('authNavBtn');btn.textContent=user.displayName||user.email.split('@')[0];btn.onclick=()=>location.href='mypage.html';}
+updateBadge();
+</script>
+</body>
+</html>

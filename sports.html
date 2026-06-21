@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#C8A96B">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+  <title>MIRU | 스포츠</title>
+  <meta name="description" content="MIRU 스포츠 컬렉션 · 55개 제품 · 오더베이스 위탁판매">
+  <style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070A;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --gold:#C8A96B;--gold-dim:#9a7d4f;--text:#F5F5F7;--muted:#888;
+  --green:#4caf92;--blur:28px;--radius:16px
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,7,10,.92);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+  padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.nav-logo{font-size:1.35rem;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-right:auto}
+.nav-links{display:flex;gap:.4rem;flex-wrap:wrap}
+.nav-links a{padding:.35rem .85rem;border-radius:100px;font-size:.78rem;
+  border:1px solid var(--border);transition:.2s;color:var(--muted)}
+.nav-links a:hover,.nav-links a.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+.nav-cart-btn{background:none;border:1px solid var(--border);color:var(--text);
+  border-radius:100px;padding:.35rem .85rem;font-size:.78rem;cursor:pointer;
+  transition:.2s;white-space:nowrap;font-family:inherit}
+.nav-cart-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-cart-btn.has-items{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:3.5rem 1.5rem 2.5rem;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(200,169,107,.1),transparent)}
+.hero-badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);
+  font-size:.7rem;padding:.28rem .85rem;border-radius:100px;letter-spacing:.12em;margin-bottom:1.1rem}
+.hero h1{font-size:clamp(1.7rem,4.5vw,3rem);font-weight:700;line-height:1.2;margin-bottom:.7rem}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);font-size:.9rem;max-width:460px;margin:0 auto 2rem}
+.hero-stats{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.stat-num{font-size:1.55rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+
+/* ── SEARCH + FILTER BAR ── */
+.filter-bar{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;
+  position:sticky;top:57px;z-index:150;backdrop-filter:blur(16px)}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap input{width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:100px;padding:.5rem 1rem .5rem 2.2rem;color:var(--text);font-size:.85rem;
+  outline:none;font-family:inherit;transition:.2s}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem}
+.filter-group{display:flex;gap:.4rem;flex-wrap:wrap}
+.filter-chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;transition:.2s;
+  white-space:nowrap;font-family:inherit}
+.filter-chip:hover{border-color:var(--gold-dim);color:var(--text)}
+.filter-chip.active{background:rgba(200,169,107,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.sort-select{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;
+  outline:none;font-family:inherit}
+.result-count{font-size:.78rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+/* ── PRODUCT GRID ── */
+.section{padding:2rem 1.5rem 3rem;max-width:1240px;margin:0 auto}
+.section-title{font-size:1rem;font-weight:700;letter-spacing:.05em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.9rem}
+
+/* ── PRODUCT CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;transition:.25s;cursor:pointer;position:relative}
+.card:hover{transform:translateY(-5px);border-color:var(--gold-dim);
+  box-shadow:0 10px 36px rgba(200,169,107,.14)}
+.card-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:#111}
+.card-img{width:100%;height:100%;object-fit:cover;display:block;transition:.35s}
+.card:hover .card-img{transform:scale(1.06)}
+.card-badge{position:absolute;top:.6rem;left:.6rem;background:var(--gold);color:#000;
+  font-size:.63rem;font-weight:700;padding:.18rem .52rem;border-radius:100px;letter-spacing:.05em;z-index:1}
+.card-body{padding:.85rem}
+.card-name{font-size:.82rem;font-weight:500;line-height:1.35;margin-bottom:.45rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-price{font-size:.98rem;font-weight:700;color:var(--gold)}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem}
+.card-margin{font-size:.68rem;color:var(--green);font-weight:700}
+.card-rating{font-size:.68rem;color:var(--muted)}
+.card-btn{width:100%;margin-top:.65rem;background:rgba(200,169,107,.12);border:1px solid var(--gold-dim);
+  color:var(--gold);border-radius:8px;padding:.45rem;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:.2s;font-family:inherit}
+.card-btn:hover{background:var(--gold);color:#000}
+
+/* ── SKELETON ── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 100%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.skel-img{aspect-ratio:1;width:100%}
+.skel-body{padding:.85rem;display:flex;flex-direction:column;gap:.5rem}
+.skel-line{height:.7rem;border-radius:4px}
+.skel-line.w70{width:70%}.skel-line.w50{width:50%}.skel-line.w30{width:30%}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:5rem 1.5rem;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:1rem}
+.empty p{font-size:.9rem}
+
+/* ── CART SIDEBAR ── */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:300;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
+.sidebar-overlay.open{opacity:1;pointer-events:all}
+.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:min(380px,100vw);
+  background:#111;border-left:1px solid var(--border);z-index:400;
+  transform:translateX(100%);transition:.3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column}
+.cart-sidebar.open{transform:translateX(0)}
+.cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center}
+.cart-header h3{font-size:1rem;font-weight:700}
+.cart-close{background:none;border:none;color:var(--muted);font-size:1.3rem;
+  cursor:pointer;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-close:hover{color:var(--text);background:var(--surface)}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;display:flex;flex-direction:column;gap:.8rem}
+.cart-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:.85rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.cart-item-name{font-size:.82rem;flex:1;line-height:1.3}
+.cart-item-price{font-size:.85rem;font-weight:700;color:var(--gold);white-space:nowrap}
+.cart-item-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:.85rem;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-item-del:hover{color:#e57373;background:rgba(229,115,115,.1)}
+.cart-empty{text-align:center;color:var(--muted);padding:3rem 0;font-size:.88rem}
+.cart-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:1rem;font-size:.9rem}
+.cart-total-price{font-weight:700;color:var(--gold)}
+.cart-checkout{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;
+  padding:.85rem;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.cart-checkout:hover{background:#d4b478}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:1.5rem;background:rgba(20,20,24,.96);
+  border:1px solid var(--gold);color:var(--text);
+  padding:.65rem 1.1rem;border-radius:12px;font-size:.82rem;
+  transform:translateY(120px);opacity:0;transition:.3s cubic-bezier(.4,0,.2,1);z-index:500}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── PWA INSTALL BANNER ── */
+.pwa-banner{display:none;position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);
+  background:rgba(20,20,24,.96);border:1px solid var(--gold);border-radius:16px;
+  padding:.9rem 1.4rem;gap:.9rem;align-items:center;z-index:500;max-width:380px;width:90%}
+.pwa-banner.visible{display:flex}
+.pwa-banner-text{font-size:.82rem;flex:1;line-height:1.4}
+.pwa-banner-text strong{color:var(--gold);display:block;margin-bottom:.15rem}
+.pwa-install-btn{background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:.45rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.pwa-banner-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem}
+
+/* ── CAT GRID (index only) ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:2rem;text-align:center;transition:.25s;cursor:pointer}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-3px);background:rgba(200,169,107,.06)}
+.cat-icon{font-size:2.4rem;margin-bottom:.75rem}
+.cat-name{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
+.cat-count{font-size:.78rem;color:var(--muted)}
+.cat-margin{font-size:.78rem;color:var(--green);font-weight:600;margin-top:.3rem}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;
+  color:var(--muted);font-size:.78rem}
+footer .footer-logo{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:.4rem}
+
+@media(max-width:600px){
+  .card-grid{grid-template-columns:repeat(2,1fr);gap:.6rem}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .filter-bar{top:52px;gap:.5rem}
+  nav{padding:.7rem 1rem}
+  .section{padding:1.5rem 1rem 2.5rem}
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">MIRU</span>
+  <div class="nav-links">
+    <a href="index.html" class="">🏠 홈</a>
+    <a href="beauty.html" class="">💄 뷰티</a>
+    <a href="lifestyle.html" class="">🏡 라이프</a>
+    <a href="pet.html" class="">🐾 반려</a>
+    <a href="sports.html" class="active">⚽ 스포츠</a>
+  </div>
+  <button class="nav-cart-btn" id="navCartBtn" onclick="openCart()">🛒 장바구니</button>
+</nav>
+
+<div class="hero" style="padding:2.2rem 1.5rem 1.8rem">
+  <div class="hero-badge">⚽ 스포츠</div>
+  <h1><span>스포츠</span> 컬렉션</h1>
+  <p>오더베이스 위탁판매 · 55개 제품 · 평균 마진 48.0%</p>
+</div>
+
+<div class="filter-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" placeholder="스포츠 제품 검색..." oninput="setSearch(this.value)">
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fp active" onclick="setPrice('all',this)">전체</button>
+    <button class="filter-chip fp" onclick="setPrice('u20',this)">~₩20k</button>
+    <button class="filter-chip fp" onclick="setPrice('u50',this)">₩20~50k</button>
+    <button class="filter-chip fp" onclick="setPrice('o50',this)">₩50k+</button>
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fm active" onclick="setMargin('all',this)">전체</button>
+    <button class="filter-chip fm" onclick="setMargin('m40',this)">마진 40%+</button>
+    <button class="filter-chip fm" onclick="setMargin('m45',this)">마진 45%+</button>
+  </div>
+  <select class="sort-select" onchange="setSort(this.value)">
+    <option value="default">기본순</option>
+    <option value="price_asc">가격 낮은순</option>
+    <option value="price_desc">가격 높은순</option>
+    <option value="margin">마진 높은순</option>
+    <option value="rating">평점순</option>
+  </select>
+  <span class="result-count" id="resultCount">55개</span>
+</div>
+
+<div class="section">
+  <div class="card-grid" id="productGrid" style="display:none"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+  <div class="card-grid" id="productGrid"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+</div>
+
+<footer>
+  <div class="footer-logo">MIRU</div>
+  <p>일상의 아름다움을 발견하는 라이프스타일 스토어</p>
+  <p style="margin-top:.5rem">오더베이스 위탁판매 · 재고 0 · 마진 30%+</p>
+</footer>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>🛒 장바구니</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>합계</span>
+      <span class="cart-total-price" id="cartTotalPrice">₩0</span>
+    </div>
+    <button class="cart-checkout" onclick="showToast('✅ 주문하기 기능은 준비중입니다')">주문하기</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-text">
+    <strong>MIRU 앱 설치</strong>홈 화면에 추가하면 더 빠르게 이용할 수 있어요
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">설치</button>
+  <button class="pwa-banner-close" onclick="dismissPWA()">✕</button>
+</div>
+
+<script>
+window.__PRODUCTS__ = [{"id": "sports-001", "slug": "yoga-mat", "name": "요가매트 6mm TPE", "category": "sports", "categoryName": "스포츠", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "BEST", "rating": 4.6, "reviews": 52, "image": "https://picsum.photos/seed/yoga-mat/400/400"}, {"id": "sports-002", "slug": "resistance-band", "name": "저항 밴드 5종 세트", "category": "sports", "categoryName": "스포츠", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "BEST", "rating": 4.9, "reviews": 449, "image": "https://picsum.photos/seed/resistance-band/400/400"}, {"id": "sports-003", "slug": "massage-gun", "name": "근막 마사지 건 미니", "category": "sports", "categoryName": "스포츠", "price": 59900, "cost": 25000, "margin": 50.3, "badge": "BEST", "rating": 4.4, "reviews": 116, "image": "https://picsum.photos/seed/massage-gun/400/400"}, {"id": "sports-004", "slug": "foam-roller", "name": "폼롤러 고밀도", "category": "sports", "categoryName": "스포츠", "price": 19900, "cost": 8200, "margin": 40.7, "badge": "NEW", "rating": 4.4, "reviews": 385, "image": "https://picsum.photos/seed/foam-roller/400/400"}, {"id": "sports-005", "slug": "smart-jumprope", "name": "줄넘기 스마트 카운터", "category": "sports", "categoryName": "스포츠", "price": 18900, "cost": 7800, "margin": 39.9, "badge": "NEW", "rating": 4.6, "reviews": 395, "image": "https://picsum.photos/seed/smart-jumprope/400/400"}, {"id": "sports-006", "slug": "hand-gripper", "name": "핸드 그리퍼 세트", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "NEW", "rating": 4.6, "reviews": 23, "image": "https://picsum.photos/seed/hand-gripper/400/400"}, {"id": "sports-007", "slug": "ab-wheel", "name": "복근 AB휠 롤아웃", "category": "sports", "categoryName": "스포츠", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.6, "reviews": 355, "image": "https://picsum.photos/seed/ab-wheel/400/400"}, {"id": "sports-008", "slug": "pushup-bar", "name": "푸시업 바 세트", "category": "sports", "categoryName": "스포츠", "price": 15900, "cost": 6500, "margin": 37.3, "badge": "", "rating": 4.8, "reviews": 104, "image": "https://picsum.photos/seed/pushup-bar/400/400"}, {"id": "sports-009", "slug": "sliding-disc", "name": "코어 슬라이딩 디스크", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.5, "reviews": 237, "image": "https://picsum.photos/seed/sliding-disc/400/400"}, {"id": "sports-010", "slug": "balance-board", "name": "밸런스 보드 우드", "category": "sports", "categoryName": "스포츠", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.6, "reviews": 270, "image": "https://picsum.photos/seed/balance-board/400/400"}, {"id": "sports-011", "slug": "kickboxing-pad", "name": "킥복싱 패드 세트", "category": "sports", "categoryName": "스포츠", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.6, "reviews": 413, "image": "https://picsum.photos/seed/kickboxing-pad/400/400"}, {"id": "sports-012", "slug": "speed-bag", "name": "스피드백 권투 볼", "category": "sports", "categoryName": "스포츠", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.8, "reviews": 209, "image": "https://picsum.photos/seed/speed-bag/400/400"}, {"id": "sports-013", "slug": "boxing-gloves", "name": "장갑 복싱 훈련용", "category": "sports", "categoryName": "스포츠", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.6, "reviews": 273, "image": "https://picsum.photos/seed/boxing-gloves/400/400"}, {"id": "sports-014", "slug": "cordless-jumprope", "name": "줄없는 줄넘기 웨이트", "category": "sports", "categoryName": "스포츠", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.8, "reviews": 218, "image": "https://picsum.photos/seed/cordless-jumprope/400/400"}, {"id": "sports-015", "slug": "ninja-line", "name": "닌자 라인 키트 어린이", "category": "sports", "categoryName": "스포츠", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.4, "reviews": 81, "image": "https://picsum.photos/seed/ninja-line/400/400"}, {"id": "sports-016", "slug": "spin-bike", "name": "실내 자전거 스피너", "category": "sports", "categoryName": "스포츠", "price": 129900, "cost": 54000, "margin": 53.1, "badge": "", "rating": 4.8, "reviews": 114, "image": "https://picsum.photos/seed/spin-bike/400/400"}, {"id": "sports-017", "slug": "mini-treadmill", "name": "트레드밀 접이식 미니", "category": "sports", "categoryName": "스포츠", "price": 189900, "cost": 80000, "margin": 53.3, "badge": "", "rating": 4.7, "reviews": 316, "image": "https://picsum.photos/seed/mini-treadmill/400/400"}, {"id": "sports-018", "slug": "smart-hula", "name": "스마트 훌라후프 자동 회전", "category": "sports", "categoryName": "스포츠", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.6, "reviews": 439, "image": "https://picsum.photos/seed/smart-hula/400/400"}, {"id": "sports-019", "slug": "adjustable-dumbbell", "name": "무게 조절 덤벨 세트", "category": "sports", "categoryName": "스포츠", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.8, "reviews": 447, "image": "https://picsum.photos/seed/adjustable-dumbbell/400/400"}, {"id": "sports-020", "slug": "kettlebell", "name": "케틀벨 주철 16kg", "category": "sports", "categoryName": "스포츠", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.7, "reviews": 310, "image": "https://picsum.photos/seed/kettlebell/400/400"}, {"id": "sports-021", "slug": "trx-trainer", "name": "TRX 서스펜션 트레이너", "category": "sports", "categoryName": "스포츠", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.6, "reviews": 76, "image": "https://picsum.photos/seed/trx-trainer/400/400"}, {"id": "sports-022", "slug": "power-rack", "name": "파워 랙 접이식", "category": "sports", "categoryName": "스포츠", "price": 149900, "cost": 63000, "margin": 53.0, "badge": "", "rating": 4.3, "reviews": 93, "image": "https://picsum.photos/seed/power-rack/400/400"}, {"id": "sports-023", "slug": "pullup-band", "name": "라텍스 풀업 밴드", "category": "sports", "categoryName": "스포츠", "price": 19900, "cost": 8200, "margin": 40.7, "badge": "", "rating": 4.9, "reviews": 214, "image": "https://picsum.photos/seed/pullup-band/400/400"}, {"id": "sports-024", "slug": "door-pullup", "name": "철봉 도어형", "category": "sports", "categoryName": "스포츠", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.6, "reviews": 220, "image": "https://picsum.photos/seed/door-pullup/400/400"}, {"id": "sports-025", "slug": "yoga-block", "name": "요가 블록 2개 세트", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.7, "reviews": 376, "image": "https://picsum.photos/seed/yoga-block/400/400"}, {"id": "sports-026", "slug": "yoga-strap", "name": "요가 스트랩", "category": "sports", "categoryName": "스포츠", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.4, "reviews": 152, "image": "https://picsum.photos/seed/yoga-strap/400/400"}, {"id": "sports-027", "slug": "pilates-ring", "name": "필라테스 링", "category": "sports", "categoryName": "스포츠", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.4, "reviews": 187, "image": "https://picsum.photos/seed/pilates-ring/400/400"}, {"id": "sports-028", "slug": "ankle-weight", "name": "발목 모래주머니 1kg", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.5, "reviews": 152, "image": "https://picsum.photos/seed/ankle-weight/400/400"}, {"id": "sports-029", "slug": "wrist-weight", "name": "손목 모래주머니 0.5kg", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.8, "reviews": 381, "image": "https://picsum.photos/seed/wrist-weight/400/400"}, {"id": "sports-030", "slug": "workout-gloves", "name": "운동 장갑 논슬립", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.8, "reviews": 173, "image": "https://picsum.photos/seed/workout-gloves/400/400"}, {"id": "sports-031", "slug": "sports-bottle", "name": "스포츠 물통 BPA프리 1L", "category": "sports", "categoryName": "스포츠", "price": 18900, "cost": 7800, "margin": 39.9, "badge": "", "rating": 4.4, "reviews": 319, "image": "https://picsum.photos/seed/sports-bottle/400/400"}, {"id": "sports-032", "slug": "ice-pack", "name": "아이스 팩 재사용 젤", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.7, "reviews": 93, "image": "https://picsum.photos/seed/ice-pack/400/400"}, {"id": "sports-033", "slug": "knee-support", "name": "무릎 보호대 스포츠", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.7, "reviews": 304, "image": "https://picsum.photos/seed/knee-support/400/400"}, {"id": "sports-034", "slug": "ankle-brace", "name": "발목 보호대 압박", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.5, "reviews": 355, "image": "https://picsum.photos/seed/ankle-brace/400/400"}, {"id": "sports-035", "slug": "kinesio-tape", "name": "스포츠 테이핑 키네시오", "category": "sports", "categoryName": "스포츠", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.7, "reviews": 352, "image": "https://picsum.photos/seed/kinesio-tape/400/400"}, {"id": "sports-036", "slug": "trekking-pole", "name": "등산 스틱 카본 1쌍", "category": "sports", "categoryName": "스포츠", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.5, "reviews": 285, "image": "https://picsum.photos/seed/trekking-pole/400/400"}, {"id": "sports-037", "slug": "armband", "name": "런닝 암밴드 폰 홀더", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.4, "reviews": 369, "image": "https://picsum.photos/seed/armband/400/400"}, {"id": "sports-038", "slug": "ems-pad", "name": "스마트 근육 자극기 EMS 패드", "category": "sports", "categoryName": "스포츠", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.7, "reviews": 366, "image": "https://picsum.photos/seed/ems-pad/400/400"}, {"id": "sports-039", "slug": "electric-heatpack", "name": "냉온 찜질팩 전기", "category": "sports", "categoryName": "스포츠", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.8, "reviews": 138, "image": "https://picsum.photos/seed/electric-heatpack/400/400"}, {"id": "sports-040", "slug": "acupressure-slipper", "name": "마사지 슬리퍼 지압", "category": "sports", "categoryName": "스포츠", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.4, "reviews": 218, "image": "https://picsum.photos/seed/acupressure-slipper/400/400"}, {"id": "sports-041", "slug": "swim-plugs", "name": "수영 귀마개 + 코마개", "category": "sports", "categoryName": "스포츠", "price": 7900, "cost": 3200, "margin": 18.5, "badge": "", "rating": 4.5, "reviews": 393, "image": "https://picsum.photos/seed/swim-plugs/400/400"}, {"id": "sports-042", "slug": "swim-goggles", "name": "수경 미러 코팅 성인", "category": "sports", "categoryName": "스포츠", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.7, "reviews": 392, "image": "https://picsum.photos/seed/swim-goggles/400/400"}, {"id": "sports-043", "slug": "swim-cap", "name": "수영 모자 실리콘", "category": "sports", "categoryName": "스포츠", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.8, "reviews": 86, "image": "https://picsum.photos/seed/swim-cap/400/400"}, {"id": "sports-044", "slug": "chalk-powder", "name": "클라이밍 초크 분말", "category": "sports", "categoryName": "스포츠", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.6, "reviews": 473, "image": "https://picsum.photos/seed/chalk-powder/400/400"}, {"id": "sports-045", "slug": "smart-cycling", "name": "인도어 자전거 스마트 앱", "category": "sports", "categoryName": "스포츠", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.6, "reviews": 475, "image": "https://picsum.photos/seed/smart-cycling/400/400"}, {"id": "sports-046", "slug": "trampoline", "name": "점프 트램폴린 접이식", "category": "sports", "categoryName": "스포츠", "price": 79900, "cost": 33000, "margin": 51.9, "badge": "", "rating": 4.6, "reviews": 433, "image": "https://picsum.photos/seed/trampoline/400/400"}, {"id": "sports-047", "slug": "badminton-set", "name": "배드민턴 라켓 세트", "category": "sports", "categoryName": "스포츠", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.5, "reviews": 287, "image": "https://picsum.photos/seed/badminton-set/400/400"}, {"id": "sports-048", "slug": "table-tennis-set", "name": "탁구 세트 휴대용", "category": "sports", "categoryName": "스포츠", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.8, "reviews": 455, "image": "https://picsum.photos/seed/table-tennis-set/400/400"}, {"id": "sports-049", "slug": "putting-mat", "name": "골프 퍼팅 연습 매트", "category": "sports", "categoryName": "스포츠", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.4, "reviews": 366, "image": "https://picsum.photos/seed/putting-mat/400/400"}, {"id": "sports-050", "slug": "volleyball", "name": "배구공 실내용", "category": "sports", "categoryName": "스포츠", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.6, "reviews": 451, "image": "https://picsum.photos/seed/volleyball/400/400"}, {"id": "sports-051", "slug": "basketball", "name": "농구공 사이즈 7", "category": "sports", "categoryName": "스포츠", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.5, "reviews": 458, "image": "https://picsum.photos/seed/basketball/400/400"}, {"id": "sports-052", "slug": "soccer-ball", "name": "축구공 PU 사이즈 5", "category": "sports", "categoryName": "스포츠", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.9, "reviews": 261, "image": "https://picsum.photos/seed/soccer-ball/400/400"}, {"id": "sports-053", "slug": "tennis-trainer", "name": "테니스 연습 머신 미니", "category": "sports", "categoryName": "스포츠", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.6, "reviews": 428, "image": "https://picsum.photos/seed/tennis-trainer/400/400"}, {"id": "sports-054", "slug": "frisbee", "name": "프리스비 프로용", "category": "sports", "categoryName": "스포츠", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.5, "reviews": 12, "image": "https://picsum.photos/seed/frisbee/400/400"}, {"id": "sports-055", "slug": "skateboard", "name": "스케이트보드 컴플리트", "category": "sports", "categoryName": "스포츠", "price": 69900, "cost": 29000, "margin": 51.2, "badge": "", "rating": 4.5, "reviews": 210, "image": "https://picsum.photos/seed/skateboard/400/400"}];
+
+// ── CART ──
+let cart = JSON.parse(sessionStorage.getItem('miru_cart')||'[]');
+
+function openCart(){
+  document.getElementById('cartSidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  renderCartItems();
+}
+function closeCart(){
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function renderCartItems(){
+  const el = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  if(!cart.length){
+    el.innerHTML='<div class="cart-empty">🛒 장바구니가 비어있습니다</div>';
+    if(footerEl) footerEl.style.display='none';
+    return;
+  }
+  if(footerEl) footerEl.style.display='block';
+  const total = cart.reduce((s,i)=>s+i.price,0);
+  el.innerHTML = cart.map((item,i)=>`
+    <div class="cart-item">
+      <div class="cart-item-name">${item.name}</div>
+      <div class="cart-item-price">₩${item.price.toLocaleString()}</div>
+      <button class="cart-item-del" onclick="removeCart(${i})" title="삭제">✕</button>
+    </div>`).join('');
+  document.getElementById('cartTotalPrice').textContent='₩'+total.toLocaleString();
+}
+function removeCart(i){
+  cart.splice(i,1);
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  renderCartItems();
+}
+function addToCart(name,price){
+  cart.push({name,price});
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  showToast('🛒 장바구니에 담겼습니다');
+}
+function updateCartNav(){
+  const btn = document.getElementById('navCartBtn');
+  if(!btn) return;
+  if(cart.length){
+    btn.textContent='🛒 '+cart.length+'개';
+    btn.classList.add('has-items');
+  } else {
+    btn.textContent='🛒 장바구니';
+    btn.classList.remove('has-items');
+  }
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── SKELETON → PRODUCTS ──
+function hideSkeleton(){
+  document.querySelectorAll('.skel-card').forEach(el=>el.remove());
+  document.getElementById('productGrid').style.display='grid';
+}
+
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  const banner=document.getElementById('pwaBanner');
+  if(banner) banner.classList.add('visible');
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+function dismissPWA(){
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  setTimeout(hideSkeleton, 600);
+});
+
+
+// ── SEARCH + FILTER ──
+let allProducts = window.__PRODUCTS__ || [];
+let activePrice = 'all';
+let activeMargin = 'all';
+let activeSort = 'default';
+let searchQuery = '';
+
+const priceRanges = {
+  all: ()=>true,
+  u20: p=>p.price<20000,
+  u50: p=>p.price>=20000&&p.price<50000,
+  o50: p=>p.price>=50000
+};
+const marginRanges = {
+  all: ()=>true,
+  m30: p=>p.margin>=30,
+  m40: p=>p.margin>=40,
+  m45: p=>p.margin>=45
+};
+const sorters = {
+  default: (a,b)=>0,
+  price_asc: (a,b)=>a.price-b.price,
+  price_desc: (a,b)=>b.price-a.price,
+  margin: (a,b)=>b.margin-a.margin,
+  rating: (a,b)=>b.rating-a.rating
+};
+
+function applyFilters(){
+  let res = allProducts.filter(p=>{
+    const q = searchQuery.trim().toLowerCase();
+    return (!q || p.name.toLowerCase().includes(q)) &&
+           priceRanges[activePrice](p) &&
+           marginRanges[activeMargin](p);
+  });
+  res.sort(sorters[activeSort]);
+
+  const grid = document.getElementById('productGrid');
+  const cnt  = document.getElementById('resultCount');
+  if(cnt) cnt.textContent = res.length+'개';
+
+  if(!res.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>검색 결과가 없습니다</p></div>';
+    return;
+  }
+  grid.innerHTML = res.map(p=>{
+    const badge = p.badge ? `<span class="card-badge">${p.badge}</span>` : '';
+    return `<div class="card" onclick="location.href='product-${p.slug||p.id}.html'" >
+      ${badge}
+      <div class="card-img-wrap">
+        <img class="card-img" src="${p.image}" alt="${p.name}" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">₩${p.price.toLocaleString()}</div>
+        <div class="card-meta">
+          <span class="card-margin">마진 ${p.margin}%</span>
+          <span class="card-rating">⭐ ${p.rating}</span>
+        </div>
+        <button class="card-btn" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g,"\'")}',${p.price})">장바구니 담기</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setPrice(v,el){
+  activePrice=v;
+  document.querySelectorAll('.fp').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setMargin(v,el){
+  activeMargin=v;
+  document.querySelectorAll('.fm').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setSort(v){ activeSort=v; applyFilters(); }
+function setSearch(v){ searchQuery=v; applyFilters(); }
+
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  applyFilters();
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#C8A96B">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+  <title>MIRU | 반려동물</title>
+  <meta name="description" content="MIRU 반려동물 컬렉션 · 55개 제품 · 오더베이스 위탁판매">
+  <style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070A;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --gold:#C8A96B;--gold-dim:#9a7d4f;--text:#F5F5F7;--muted:#888;
+  --green:#4caf92;--blur:28px;--radius:16px
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,7,10,.92);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+  padding:.85rem 1.5rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.nav-logo{font-size:1.35rem;font-weight:700;color:var(--gold);letter-spacing:.1em;margin-right:auto}
+.nav-links{display:flex;gap:.4rem;flex-wrap:wrap}
+.nav-links a{padding:.35rem .85rem;border-radius:100px;font-size:.78rem;
+  border:1px solid var(--border);transition:.2s;color:var(--muted)}
+.nav-links a:hover,.nav-links a.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+.nav-cart-btn{background:none;border:1px solid var(--border);color:var(--text);
+  border-radius:100px;padding:.35rem .85rem;font-size:.78rem;cursor:pointer;
+  transition:.2s;white-space:nowrap;font-family:inherit}
+.nav-cart-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-cart-btn.has-items{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:3.5rem 1.5rem 2.5rem;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(200,169,107,.1),transparent)}
+.hero-badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);
+  font-size:.7rem;padding:.28rem .85rem;border-radius:100px;letter-spacing:.12em;margin-bottom:1.1rem}
+.hero h1{font-size:clamp(1.7rem,4.5vw,3rem);font-weight:700;line-height:1.2;margin-bottom:.7rem}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);font-size:.9rem;max-width:460px;margin:0 auto 2rem}
+.hero-stats{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.stat-num{font-size:1.55rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+
+/* ── SEARCH + FILTER BAR ── */
+.filter-bar{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;
+  position:sticky;top:57px;z-index:150;backdrop-filter:blur(16px)}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap input{width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:100px;padding:.5rem 1rem .5rem 2.2rem;color:var(--text);font-size:.85rem;
+  outline:none;font-family:inherit;transition:.2s}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem}
+.filter-group{display:flex;gap:.4rem;flex-wrap:wrap}
+.filter-chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;transition:.2s;
+  white-space:nowrap;font-family:inherit}
+.filter-chip:hover{border-color:var(--gold-dim);color:var(--text)}
+.filter-chip.active{background:rgba(200,169,107,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.sort-select{background:var(--surface);border:1px solid var(--border);color:var(--muted);
+  border-radius:100px;padding:.35rem .8rem;font-size:.75rem;cursor:pointer;
+  outline:none;font-family:inherit}
+.result-count{font-size:.78rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+/* ── PRODUCT GRID ── */
+.section{padding:2rem 1.5rem 3rem;max-width:1240px;margin:0 auto}
+.section-title{font-size:1rem;font-weight:700;letter-spacing:.05em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.9rem}
+
+/* ── PRODUCT CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;transition:.25s;cursor:pointer;position:relative}
+.card:hover{transform:translateY(-5px);border-color:var(--gold-dim);
+  box-shadow:0 10px 36px rgba(200,169,107,.14)}
+.card-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:#111}
+.card-img{width:100%;height:100%;object-fit:cover;display:block;transition:.35s}
+.card:hover .card-img{transform:scale(1.06)}
+.card-badge{position:absolute;top:.6rem;left:.6rem;background:var(--gold);color:#000;
+  font-size:.63rem;font-weight:700;padding:.18rem .52rem;border-radius:100px;letter-spacing:.05em;z-index:1}
+.card-body{padding:.85rem}
+.card-name{font-size:.82rem;font-weight:500;line-height:1.35;margin-bottom:.45rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-price{font-size:.98rem;font-weight:700;color:var(--gold)}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem}
+.card-margin{font-size:.68rem;color:var(--green);font-weight:700}
+.card-rating{font-size:.68rem;color:var(--muted)}
+.card-btn{width:100%;margin-top:.65rem;background:rgba(200,169,107,.12);border:1px solid var(--gold-dim);
+  color:var(--gold);border-radius:8px;padding:.45rem;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:.2s;font-family:inherit}
+.card-btn:hover{background:var(--gold);color:#000}
+
+/* ── SKELETON ── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 100%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.skel-img{aspect-ratio:1;width:100%}
+.skel-body{padding:.85rem;display:flex;flex-direction:column;gap:.5rem}
+.skel-line{height:.7rem;border-radius:4px}
+.skel-line.w70{width:70%}.skel-line.w50{width:50%}.skel-line.w30{width:30%}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:5rem 1.5rem;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:1rem}
+.empty p{font-size:.9rem}
+
+/* ── CART SIDEBAR ── */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:300;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
+.sidebar-overlay.open{opacity:1;pointer-events:all}
+.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:min(380px,100vw);
+  background:#111;border-left:1px solid var(--border);z-index:400;
+  transform:translateX(100%);transition:.3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column}
+.cart-sidebar.open{transform:translateX(0)}
+.cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center}
+.cart-header h3{font-size:1rem;font-weight:700}
+.cart-close{background:none;border:none;color:var(--muted);font-size:1.3rem;
+  cursor:pointer;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-close:hover{color:var(--text);background:var(--surface)}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;display:flex;flex-direction:column;gap:.8rem}
+.cart-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:.85rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.cart-item-name{font-size:.82rem;flex:1;line-height:1.3}
+.cart-item-price{font-size:.85rem;font-weight:700;color:var(--gold);white-space:nowrap}
+.cart-item-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:.85rem;padding:.2rem .4rem;border-radius:6px;transition:.2s}
+.cart-item-del:hover{color:#e57373;background:rgba(229,115,115,.1)}
+.cart-empty{text-align:center;color:var(--muted);padding:3rem 0;font-size:.88rem}
+.cart-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:1rem;font-size:.9rem}
+.cart-total-price{font-weight:700;color:var(--gold)}
+.cart-checkout{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;
+  padding:.85rem;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.cart-checkout:hover{background:#d4b478}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:1.5rem;background:rgba(20,20,24,.96);
+  border:1px solid var(--gold);color:var(--text);
+  padding:.65rem 1.1rem;border-radius:12px;font-size:.82rem;
+  transform:translateY(120px);opacity:0;transition:.3s cubic-bezier(.4,0,.2,1);z-index:500}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── PWA INSTALL BANNER ── */
+.pwa-banner{display:none;position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);
+  background:rgba(20,20,24,.96);border:1px solid var(--gold);border-radius:16px;
+  padding:.9rem 1.4rem;gap:.9rem;align-items:center;z-index:500;max-width:380px;width:90%}
+.pwa-banner.visible{display:flex}
+.pwa-banner-text{font-size:.82rem;flex:1;line-height:1.4}
+.pwa-banner-text strong{color:var(--gold);display:block;margin-bottom:.15rem}
+.pwa-install-btn{background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:.45rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.pwa-banner-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.1rem .3rem}
+
+/* ── CAT GRID (index only) ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:2rem;text-align:center;transition:.25s;cursor:pointer}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-3px);background:rgba(200,169,107,.06)}
+.cat-icon{font-size:2.4rem;margin-bottom:.75rem}
+.cat-name{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
+.cat-count{font-size:.78rem;color:var(--muted)}
+.cat-margin{font-size:.78rem;color:var(--green);font-weight:600;margin-top:.3rem}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;
+  color:var(--muted);font-size:.78rem}
+footer .footer-logo{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:.4rem}
+
+@media(max-width:600px){
+  .card-grid{grid-template-columns:repeat(2,1fr);gap:.6rem}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .filter-bar{top:52px;gap:.5rem}
+  nav{padding:.7rem 1rem}
+  .section{padding:1.5rem 1rem 2.5rem}
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">MIRU</span>
+  <div class="nav-links">
+    <a href="index.html" class="">🏠 홈</a>
+    <a href="beauty.html" class="">💄 뷰티</a>
+    <a href="lifestyle.html" class="">🏡 라이프</a>
+    <a href="pet.html" class="active">🐾 반려</a>
+    <a href="sports.html" class="">⚽ 스포츠</a>
+  </div>
+  <button class="nav-cart-btn" id="navCartBtn" onclick="openCart()">🛒 장바구니</button>
+</nav>
+
+<div class="hero" style="padding:2.2rem 1.5rem 1.8rem">
+  <div class="hero-badge">🐾 반려동물</div>
+  <h1><span>반려동물</span> 컬렉션</h1>
+  <p>오더베이스 위탁판매 · 55개 제품 · 평균 마진 47.3%</p>
+</div>
+
+<div class="filter-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" placeholder="반려동물 제품 검색..." oninput="setSearch(this.value)">
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fp active" onclick="setPrice('all',this)">전체</button>
+    <button class="filter-chip fp" onclick="setPrice('u20',this)">~₩20k</button>
+    <button class="filter-chip fp" onclick="setPrice('u50',this)">₩20~50k</button>
+    <button class="filter-chip fp" onclick="setPrice('o50',this)">₩50k+</button>
+  </div>
+  <div class="filter-group">
+    <button class="filter-chip fm active" onclick="setMargin('all',this)">전체</button>
+    <button class="filter-chip fm" onclick="setMargin('m40',this)">마진 40%+</button>
+    <button class="filter-chip fm" onclick="setMargin('m45',this)">마진 45%+</button>
+  </div>
+  <select class="sort-select" onchange="setSort(this.value)">
+    <option value="default">기본순</option>
+    <option value="price_asc">가격 낮은순</option>
+    <option value="price_desc">가격 높은순</option>
+    <option value="margin">마진 높은순</option>
+    <option value="rating">평점순</option>
+  </select>
+  <span class="result-count" id="resultCount">55개</span>
+</div>
+
+<div class="section">
+  <div class="card-grid" id="productGrid" style="display:none"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+  <div class="card-grid" id="productGrid"><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div><div class="skel-card">
+      <div class="skel-img skeleton"></div>
+      <div class="skel-body">
+        <div class="skel-line skeleton w70"></div>
+        <div class="skel-line skeleton w50" style="margin-top:.3rem"></div>
+        <div class="skel-line skeleton w30" style="margin-top:.5rem"></div>
+      </div>
+    </div></div>
+</div>
+
+<footer>
+  <div class="footer-logo">MIRU</div>
+  <p>일상의 아름다움을 발견하는 라이프스타일 스토어</p>
+  <p style="margin-top:.5rem">오더베이스 위탁판매 · 재고 0 · 마진 30%+</p>
+</footer>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>🛒 장바구니</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>합계</span>
+      <span class="cart-total-price" id="cartTotalPrice">₩0</span>
+    </div>
+    <button class="cart-checkout" onclick="showToast('✅ 주문하기 기능은 준비중입니다')">주문하기</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-text">
+    <strong>MIRU 앱 설치</strong>홈 화면에 추가하면 더 빠르게 이용할 수 있어요
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">설치</button>
+  <button class="pwa-banner-close" onclick="dismissPWA()">✕</button>
+</div>
+
+<script>
+window.__PRODUCTS__ = [{"id": "pet-001", "slug": "pet-fountain", "name": "자동 급수기 2.5L", "category": "pet", "categoryName": "반려동물", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "BEST", "rating": 4.7, "reviews": 425, "image": "https://picsum.photos/seed/pet-fountain/400/400"}, {"id": "pet-002", "slug": "auto-feeder", "name": "자동 급식기 스마트", "category": "pet", "categoryName": "반려동물", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "BEST", "rating": 4.6, "reviews": 411, "image": "https://picsum.photos/seed/auto-feeder/400/400"}, {"id": "pet-003", "slug": "gps-tracker", "name": "GPS 위치 추적기", "category": "pet", "categoryName": "반려동물", "price": 59900, "cost": 25000, "margin": 50.3, "badge": "BEST", "rating": 4.9, "reviews": 276, "image": "https://picsum.photos/seed/gps-tracker/400/400"}, {"id": "pet-004", "slug": "grooming-brush", "name": "코너 그루밍 브러시", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "NEW", "rating": 4.5, "reviews": 131, "image": "https://picsum.photos/seed/grooming-brush/400/400"}, {"id": "pet-005", "slug": "laser-toy", "name": "반려동물 자동 레이저 장난감", "category": "pet", "categoryName": "반려동물", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "NEW", "rating": 4.7, "reviews": 104, "image": "https://picsum.photos/seed/laser-toy/400/400"}, {"id": "pet-006", "slug": "auto-litter", "name": "셀프 청소 고양이 화장실", "category": "pet", "categoryName": "반려동물", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "NEW", "rating": 4.5, "reviews": 26, "image": "https://picsum.photos/seed/auto-litter/400/400"}, {"id": "pet-007", "slug": "ball-launcher", "name": "강아지 자동 공 발사기", "category": "pet", "categoryName": "반려동물", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.9, "reviews": 204, "image": "https://picsum.photos/seed/ball-launcher/400/400"}, {"id": "pet-008", "slug": "pet-cam", "name": "스마트 카메라 펫캠", "category": "pet", "categoryName": "반려동물", "price": 69900, "cost": 29000, "margin": 51.2, "badge": "", "rating": 4.7, "reviews": 74, "image": "https://picsum.photos/seed/pet-cam/400/400"}, {"id": "pet-009", "slug": "cat-scratcher", "name": "고양이 스크래처 하우스", "category": "pet", "categoryName": "반려동물", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.8, "reviews": 457, "image": "https://picsum.photos/seed/cat-scratcher/400/400"}, {"id": "pet-010", "slug": "dog-puzzle", "name": "강아지 지능 개발 퍼즐", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8200, "margin": 40.7, "badge": "", "rating": 4.4, "reviews": 60, "image": "https://picsum.photos/seed/dog-puzzle/400/400"}, {"id": "pet-011", "slug": "pet-clipper", "name": "반려동물 전동 이발기", "category": "pet", "categoryName": "반려동물", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.7, "reviews": 53, "image": "https://picsum.photos/seed/pet-clipper/400/400"}, {"id": "pet-012", "slug": "bath-glove", "name": "강아지 목욕 장갑", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.9, "reviews": 37, "image": "https://picsum.photos/seed/bath-glove/400/400"}, {"id": "pet-013", "slug": "feather-toy", "name": "고양이 자동 페더 장난감", "category": "pet", "categoryName": "반려동물", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.9, "reviews": 14, "image": "https://picsum.photos/seed/feather-toy/400/400"}, {"id": "pet-014", "slug": "pet-thermometer", "name": "반려동물 체온계 귀", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.4, "reviews": 33, "image": "https://picsum.photos/seed/pet-thermometer/400/400"}, {"id": "pet-015", "slug": "led-collar", "name": "LED 방수 안전 목줄", "category": "pet", "categoryName": "반려동물", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.8, "reviews": 177, "image": "https://picsum.photos/seed/led-collar/400/400"}, {"id": "pet-016", "slug": "pet-stairs", "name": "스마트 반려동물 계단", "category": "pet", "categoryName": "반려동물", "price": 39900, "cost": 16500, "margin": 48.1, "badge": "", "rating": 4.9, "reviews": 28, "image": "https://picsum.photos/seed/pet-stairs/400/400"}, {"id": "pet-017", "slug": "foldable-house", "name": "이동식 접이식 펫 하우스", "category": "pet", "categoryName": "반려동물", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.8, "reviews": 219, "image": "https://picsum.photos/seed/foldable-house/400/400"}, {"id": "pet-018", "slug": "cooling-mat", "name": "여름 냉각 매트 펫", "category": "pet", "categoryName": "반려동물", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.9, "reviews": 311, "image": "https://picsum.photos/seed/cooling-mat/400/400"}, {"id": "pet-019", "slug": "ear-cleaner", "name": "반려동물 귀 세정제", "category": "pet", "categoryName": "반려동물", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.6, "reviews": 474, "image": "https://picsum.photos/seed/ear-cleaner/400/400"}, {"id": "pet-020", "slug": "paw-wax", "name": "개 발바닥 왁스 보호제", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.6, "reviews": 226, "image": "https://picsum.photos/seed/paw-wax/400/400"}, {"id": "pet-021", "slug": "dry-shampoo", "name": "고양이 샴푸 드라이샴푸", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.5, "reviews": 173, "image": "https://picsum.photos/seed/dry-shampoo/400/400"}, {"id": "pet-022", "slug": "grooming-scissors", "name": "반려동물 LED 미용 가위", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.5, "reviews": 369, "image": "https://picsum.photos/seed/grooming-scissors/400/400"}, {"id": "pet-023", "slug": "dental-treat", "name": "강아지 틀니 간식", "category": "pet", "categoryName": "반려동물", "price": 8900, "cost": 3600, "margin": 22.8, "badge": "", "rating": 4.8, "reviews": 12, "image": "https://picsum.photos/seed/dental-treat/400/400"}, {"id": "pet-024", "slug": "catnip-set", "name": "고양이 캣닙 장난감 세트", "category": "pet", "categoryName": "반려동물", "price": 15900, "cost": 6500, "margin": 37.3, "badge": "", "rating": 4.6, "reviews": 254, "image": "https://picsum.photos/seed/catnip-set/400/400"}, {"id": "pet-025", "slug": "clicker", "name": "강아지 훈련 클리커", "category": "pet", "categoryName": "반려동물", "price": 7900, "cost": 3200, "margin": 18.5, "badge": "", "rating": 4.3, "reviews": 248, "image": "https://picsum.photos/seed/clicker/400/400"}, {"id": "pet-026", "slug": "pet-passport", "name": "반려동물 여권 홀더", "category": "pet", "categoryName": "반려동물", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.8, "reviews": 16, "image": "https://picsum.photos/seed/pet-passport/400/400"}, {"id": "pet-027", "slug": "cat-auto-feeder", "name": "고양이 자동 급식기 미니", "category": "pet", "categoryName": "반려동물", "price": 49900, "cost": 21000, "margin": 48.9, "badge": "", "rating": 4.5, "reviews": 21, "image": "https://picsum.photos/seed/cat-auto-feeder/400/400"}, {"id": "pet-028", "slug": "dog-raincoat", "name": "강아지 방수 비옷", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.6, "reviews": 175, "image": "https://picsum.photos/seed/dog-raincoat/400/400"}, {"id": "pet-029", "slug": "pet-backpack", "name": "반려동물 여행 가방 백팩", "category": "pet", "categoryName": "반려동물", "price": 54900, "cost": 23000, "margin": 49.6, "badge": "", "rating": 4.7, "reviews": 452, "image": "https://picsum.photos/seed/pet-backpack/400/400"}, {"id": "pet-030", "slug": "window-hammock", "name": "고양이 창문 해먹", "category": "pet", "categoryName": "반려동물", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.7, "reviews": 479, "image": "https://picsum.photos/seed/window-hammock/400/400"}, {"id": "pet-031", "slug": "retractable-leash", "name": "강아지 앤저 리쉬 자동", "category": "pet", "categoryName": "반려동물", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.6, "reviews": 438, "image": "https://picsum.photos/seed/retractable-leash/400/400"}, {"id": "pet-032", "slug": "quiet-dryer", "name": "펫 드라이어 조용한", "category": "pet", "categoryName": "반려동물", "price": 44900, "cost": 18800, "margin": 48.4, "badge": "", "rating": 4.7, "reviews": 112, "image": "https://picsum.photos/seed/quiet-dryer/400/400"}, {"id": "pet-033", "slug": "pet-carrier", "name": "반려동물 편안한 이동장", "category": "pet", "categoryName": "반려동물", "price": 59900, "cost": 25000, "margin": 50.3, "badge": "", "rating": 4.3, "reviews": 129, "image": "https://picsum.photos/seed/pet-carrier/400/400"}, {"id": "pet-034", "slug": "qr-collar", "name": "스마트 펫 목걸이 QR", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6200, "margin": 35.3, "badge": "", "rating": 4.7, "reviews": 105, "image": "https://picsum.photos/seed/qr-collar/400/400"}, {"id": "pet-035", "slug": "paw-washer", "name": "반려동물 발 세정기 컵", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.6, "reviews": 252, "image": "https://picsum.photos/seed/paw-washer/400/400"}, {"id": "pet-036", "slug": "cat-tunnel", "name": "고양이 터널 장난감", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.4, "reviews": 55, "image": "https://picsum.photos/seed/cat-tunnel/400/400"}, {"id": "pet-037", "slug": "chew-toy-set", "name": "강아지 치아 장난감 세트", "category": "pet", "categoryName": "반려동물", "price": 15900, "cost": 6500, "margin": 37.3, "badge": "", "rating": 4.4, "reviews": 102, "image": "https://picsum.photos/seed/chew-toy-set/400/400"}, {"id": "pet-038", "slug": "cleaning-glove", "name": "반려동물 자동 클리닝 장갑", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.7, "reviews": 288, "image": "https://picsum.photos/seed/cleaning-glove/400/400"}, {"id": "pet-039", "slug": "cat-wheel", "name": "고양이 전용 운동 쳇바퀴", "category": "pet", "categoryName": "반려동물", "price": 89900, "cost": 38000, "margin": 51.4, "badge": "", "rating": 4.3, "reviews": 298, "image": "https://picsum.photos/seed/cat-wheel/400/400"}, {"id": "pet-040", "slug": "nosework-mat", "name": "강아지 노즈워크 매트", "category": "pet", "categoryName": "반려동물", "price": 24900, "cost": 10200, "margin": 44.0, "badge": "", "rating": 4.4, "reviews": 119, "image": "https://picsum.photos/seed/nosework-mat/400/400"}, {"id": "pet-041", "slug": "flea-collar", "name": "반려동물 해충 방지 목줄", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.7, "reviews": 323, "image": "https://picsum.photos/seed/flea-collar/400/400"}, {"id": "pet-042", "slug": "tail-wand", "name": "고양이 꼬리 형태 장난감", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.6, "reviews": 149, "image": "https://picsum.photos/seed/tail-wand/400/400"}, {"id": "pet-043", "slug": "travel-bowl", "name": "강아지 자동 물그릇 여행용", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.9, "reviews": 70, "image": "https://picsum.photos/seed/travel-bowl/400/400"}, {"id": "pet-044", "slug": "insurance-guide", "name": "펫 보험 비교 가이드북", "category": "pet", "categoryName": "반려동물", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.4, "reviews": 235, "image": "https://picsum.photos/seed/insurance-guide/400/400"}, {"id": "pet-045", "slug": "joint-supplement", "name": "반려동물 관절 영양제", "category": "pet", "categoryName": "반려동물", "price": 24900, "cost": 10000, "margin": 44.8, "badge": "", "rating": 4.3, "reviews": 17, "image": "https://picsum.photos/seed/joint-supplement/400/400"}, {"id": "pet-046", "slug": "hairball-gel", "name": "고양이 헤어볼 제거 겔", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.7, "reviews": 202, "image": "https://picsum.photos/seed/hairball-gel/400/400"}, {"id": "pet-047", "slug": "treat-pouch", "name": "강아지 훈련 간식 파우치", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.8, "reviews": 107, "image": "https://picsum.photos/seed/treat-pouch/400/400"}, {"id": "pet-048", "slug": "pet-sunscreen", "name": "반려동물 전용 선크림", "category": "pet", "categoryName": "반려동물", "price": 19900, "cost": 8000, "margin": 41.7, "badge": "", "rating": 4.3, "reviews": 99, "image": "https://picsum.photos/seed/pet-sunscreen/400/400"}, {"id": "pet-049", "slug": "deodorizer", "name": "고양이 화장실 탈취제", "category": "pet", "categoryName": "반려동물", "price": 9900, "cost": 4000, "margin": 26.3, "badge": "", "rating": 4.8, "reviews": 135, "image": "https://picsum.photos/seed/deodorizer/400/400"}, {"id": "pet-050", "slug": "soft-muzzle", "name": "강아지 입마개 소프트", "category": "pet", "categoryName": "반려동물", "price": 12900, "cost": 5200, "margin": 33.4, "badge": "", "rating": 4.9, "reviews": 119, "image": "https://picsum.photos/seed/soft-muzzle/400/400"}, {"id": "pet-051", "slug": "id-tag", "name": "반려동물 인식표 맞춤 제작", "category": "pet", "categoryName": "반려동물", "price": 14900, "cost": 6000, "margin": 36.6, "badge": "", "rating": 4.4, "reviews": 179, "image": "https://picsum.photos/seed/id-tag/400/400"}, {"id": "pet-052", "slug": "heated-bed", "name": "고양이 발열 방석", "category": "pet", "categoryName": "반려동물", "price": 29900, "cost": 12500, "margin": 45.2, "badge": "", "rating": 4.8, "reviews": 25, "image": "https://picsum.photos/seed/heated-bed/400/400"}, {"id": "pet-053", "slug": "cooling-bed", "name": "강아지 방수 침대 쿨링", "category": "pet", "categoryName": "반려동물", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.8, "reviews": 116, "image": "https://picsum.photos/seed/cooling-bed/400/400"}, {"id": "pet-054", "slug": "water-tracker", "name": "반려동물 음수량 측정기", "category": "pet", "categoryName": "반려동물", "price": 22900, "cost": 9500, "margin": 42.4, "badge": "", "rating": 4.3, "reviews": 372, "image": "https://picsum.photos/seed/water-tracker/400/400"}, {"id": "pet-055", "slug": "smart-laser", "name": "고양이 스마트 레이저 앱연동", "category": "pet", "categoryName": "반려동물", "price": 34900, "cost": 14500, "margin": 46.9, "badge": "", "rating": 4.7, "reviews": 94, "image": "https://picsum.photos/seed/smart-laser/400/400"}];
+
+// ── CART ──
+let cart = JSON.parse(sessionStorage.getItem('miru_cart')||'[]');
+
+function openCart(){
+  document.getElementById('cartSidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  renderCartItems();
+}
+function closeCart(){
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function renderCartItems(){
+  const el = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  if(!cart.length){
+    el.innerHTML='<div class="cart-empty">🛒 장바구니가 비어있습니다</div>';
+    if(footerEl) footerEl.style.display='none';
+    return;
+  }
+  if(footerEl) footerEl.style.display='block';
+  const total = cart.reduce((s,i)=>s+i.price,0);
+  el.innerHTML = cart.map((item,i)=>`
+    <div class="cart-item">
+      <div class="cart-item-name">${item.name}</div>
+      <div class="cart-item-price">₩${item.price.toLocaleString()}</div>
+      <button class="cart-item-del" onclick="removeCart(${i})" title="삭제">✕</button>
+    </div>`).join('');
+  document.getElementById('cartTotalPrice').textContent='₩'+total.toLocaleString();
+}
+function removeCart(i){
+  cart.splice(i,1);
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  renderCartItems();
+}
+function addToCart(name,price){
+  cart.push({name,price});
+  sessionStorage.setItem('miru_cart',JSON.stringify(cart));
+  updateCartNav();
+  showToast('🛒 장바구니에 담겼습니다');
+}
+function updateCartNav(){
+  const btn = document.getElementById('navCartBtn');
+  if(!btn) return;
+  if(cart.length){
+    btn.textContent='🛒 '+cart.length+'개';
+    btn.classList.add('has-items');
+  } else {
+    btn.textContent='🛒 장바구니';
+    btn.classList.remove('has-items');
+  }
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── SKELETON → PRODUCTS ──
+function hideSkeleton(){
+  document.querySelectorAll('.skel-card').forEach(el=>el.remove());
+  document.getElementById('productGrid').style.display='grid';
+}
+
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  const banner=document.getElementById('pwaBanner');
+  if(banner) banner.classList.add('visible');
+});
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+function dismissPWA(){
+  document.getElementById('pwaBanner').classList.remove('visible');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  setTimeout(hideSkeleton, 600);
+});
+
+
+// ── SEARCH + FILTER ──
+let allProducts = window.__PRODUCTS__ || [];
+let activePrice = 'all';
+let activeMargin = 'all';
+let activeSort = 'default';
+let searchQuery = '';
+
+const priceRanges = {
+  all: ()=>true,
+  u20: p=>p.price<20000,
+  u50: p=>p.price>=20000&&p.price<50000,
+  o50: p=>p.price>=50000
+};
+const marginRanges = {
+  all: ()=>true,
+  m30: p=>p.margin>=30,
+  m40: p=>p.margin>=40,
+  m45: p=>p.margin>=45
+};
+const sorters = {
+  default: (a,b)=>0,
+  price_asc: (a,b)=>a.price-b.price,
+  price_desc: (a,b)=>b.price-a.price,
+  margin: (a,b)=>b.margin-a.margin,
+  rating: (a,b)=>b.rating-a.rating
+};
+
+function applyFilters(){
+  let res = allProducts.filter(p=>{
+    const q = searchQuery.trim().toLowerCase();
+    return (!q || p.name.toLowerCase().includes(q)) &&
+           priceRanges[activePrice](p) &&
+           marginRanges[activeMargin](p);
+  });
+  res.sort(sorters[activeSort]);
+
+  const grid = document.getElementById('productGrid');
+  const cnt  = document.getElementById('resultCount');
+  if(cnt) cnt.textContent = res.length+'개';
+
+  if(!res.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>검색 결과가 없습니다</p></div>';
+    return;
+  }
+  grid.innerHTML = res.map(p=>{
+    const badge = p.badge ? `<span class="card-badge">${p.badge}</span>` : '';
+    return `<div class="card" onclick="location.href='product-${p.slug||p.id}.html'" >
+      ${badge}
+      <div class="card-img-wrap">
+        <img class="card-img" src="${p.image}" alt="${p.name}" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">₩${p.price.toLocaleString()}</div>
+        <div class="card-meta">
+          <span class="card-margin">마진 ${p.margin}%</span>
+          <span class="card-rating">⭐ ${p.rating}</span>
+        </div>
+        <button class="card-btn" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g,"\'")}',${p.price})">장바구니 담기</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setPrice(v,el){
+  activePrice=v;
+  document.querySelectorAll('.fp').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setMargin(v,el){
+  activeMargin=v;
+  document.querySelectorAll('.fm').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); applyFilters();
+}
+function setSort(v){ activeSort=v; applyFilters(); }
+function setSearch(v){ searchQuery=v; applyFilters(); }
+
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartNav();
+  applyFilters();
+});
+
+</script>
+</body>
+</html>
