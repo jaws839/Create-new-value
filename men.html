@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>반려동물 — MIRU</title>
-<meta name="description" content="MIRU 반려동물 · 함께 사는 매일을 더 편하게 만드는 반려 용품.">
+<title>맨즈 — MIRU</title>
+<meta name="description" content="MIRU 맨즈 · 매일의 자기관리를 완성하는 남성 셀프케어.">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -13,12 +13,12 @@
 <link rel="stylesheet" href="css/miru.css">
 <script>document.documentElement.classList.add('js');if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');</script>
 </head>
-<body data-page="pet">
+<body data-page="men">
 <main>
   <header class="wrap cat-head">
-    <p class="crumb"><a href="index.html">홈</a> › 반려동물</p>
-    <h1 class="h1" style="margin-top:14px">반려동물</h1>
-    <p class="lead" style="margin-top:12px">함께 사는 매일을 더 편하게 만드는 반려 용품. <span class="tnum" id="catCount"></span></p>
+    <p class="crumb"><a href="index.html">홈</a> › 맨즈</p>
+    <h1 class="h1" style="margin-top:14px">맨즈</h1>
+    <p class="lead" style="margin-top:12px">매일의 자기관리를 완성하는 남성 셀프케어. <span class="tnum" id="catCount"></span></p>
   </header>
 
   <div class="filterbar">
@@ -31,7 +31,7 @@
       </div>
       <div class="right">
         <label for="q" style="position:absolute;left:-9999px">상품 검색</label>
-        <input class="search" id="q" type="search" placeholder="반려동물 상품 검색">
+        <input class="search" id="q" type="search" placeholder="맨즈 상품 검색">
         <label for="sort" style="position:absolute;left:-9999px">정렬</label>
         <select class="select" id="sort">
           <option value="rec">추천순</option>
@@ -43,7 +43,7 @@
     </div>
   </div>
 
-  <section class="section" style="padding-top:40px" aria-label="반려동물 상품 목록">
+  <section class="section" style="padding-top:40px" aria-label="맨즈 상품 목록">
     <div class="wrap">
       <div class="pgrid" id="grid" aria-live="polite"></div>
       <div class="more"><button class="btn btn-ghost" type="button" id="more" hidden>더 보기</button></div>
@@ -55,7 +55,7 @@
 <script>
 (function(){
   const {loadProducts, cardHTML} = window.MIRU;
-  const CAT = 'pet', STEP = 12;
+  const CAT = 'men', STEP = 12;
   const grid = document.getElementById('grid'), more = document.getElementById('more'), count = document.getElementById('catCount');
   const q = document.getElementById('q'), sort = document.getElementById('sort');
   const inPrice = {all:()=>true, u20:p=>p.price<20000, u50:p=>p.price>=20000&&p.price<50000, o50:p=>p.price>=50000};
