@@ -34,18 +34,32 @@
 
 ---
 
-## 디자인 시스템
+## 디자인 시스템 2.0 (하이브리드)
 
-**컨셉:** Dark Premium + Glassmorphism
+**컨셉:** 라이트 베이스 + 다크 밴드. 애플(여백·초대형 타이포), 삼성(카테고리 탭·고정 구매바),
+Aesop(에디토리얼 절제), Gymshark(모바일 퍼스트)에서 장점만 가져왔습니다.
+Figma 기획 파일: [MIRU Design System 2.0](https://www.figma.com/design/QPqtEkkBsjPXl7okic73Qf)
 
 | 토큰 | 값 |
 |------|-----|
-| 배경색 | `#07070A` |
-| 골드 액센트 | `#C8A96B` |
-| 서피스 | `rgba(255,255,255,0.045)` |
-| 폰트 | Pretendard Variable |
-| 블러 | `backdrop-filter: blur(28px)` |
-| 반응형 | 모바일 퍼스트, 600px 브레이크포인트 |
+| 배경 / 패널 | `#FFFFFF` / `#F5F5F7` |
+| 잉크 / 보조 텍스트 | `#1D1D1F` / `#6E6E73` |
+| 다크 밴드 | `#000000`, `#111113` |
+| 골드 포인트 | `#A8834A` (라이트), `#C8A96B` (다크) |
+| 폰트 | Pretendard Variable + Inter(숫자·영문) |
+| 공통 파일 | `css/miru.css`, `js/miru-ui.js` |
+
+**페이지 구조**
+- `index.html` — 홈 (다크 히어로 → 카테고리 탭 → 브랜드 스토리 → 시연 → 후기 → 뉴스레터)
+- `beauty.html` · `men.html` · `lifestyle.html` · `pet.html` · `sports.html` — 카테고리 (가격 필터·검색·정렬·더 보기)
+- `product.html?slug=…` — 상품 상세 (수량·구매·장바구니, 스크롤 시 고정 구매바)
+- `product-*.html` — 옛 주소 호환용 리다이렉트
+- 카테고리·상품 페이지는 `python3 tools/build_pages.py`로 생성합니다. 수정은 템플릿에서 한 번만 하면 됩니다.
+
+**콘텐츠 원칙 (법적 리스크 방지)**
+- AI 생성 이미지(`assets/img/`)는 브랜드·무드 영역에만 씁니다. 상품 사진은 공급사 실사진만 쓰며, 등록 전에는 "이미지 준비중"으로 표시합니다.
+- 실제 구매 후기가 아닌 평점·후기 수는 노출하지 않습니다. 판매 이력이 없는 할인 전 가격(취소선)도 표시하지 않습니다.
+- 고객 화면에는 마진 등 내부 데이터를 표시하지 않습니다.
 
 ---
 
@@ -76,7 +90,7 @@
 ### 지원 파일
 - `products.json` — 220개 제품 마스터 DB (59KB)
 - `manifest.json` — PWA 앱 정의
-- `sw.js` — 서비스워커 (캐시 퍼스트 전략)
+- `sw.js` — 서비스워커 (페이지·상품 데이터는 네트워크 우선, 정적 자산은 캐시 우선)
 - `sitemap.xml` — SEO 사이트맵
 - `robots.txt` — 검색엔진 크롤링 규칙
 - `og-miru.svg` — OG 이미지 (1200×630)

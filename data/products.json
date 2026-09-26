@@ -12,7 +12,8 @@
       "badge": "BEST",
       "rating": 4.3,
       "reviews": 141,
-      "image": "https://picsum.photos/seed/led-mask/400/400"
+      "image": "https://picsum.photos/seed/led-mask/400/400",
+      "desc": "7가지 LED 파장을 고를 수 있는 충전식 무선 뷰티 디바이스. 매일 10분 홈케어 루틴용."
     },
     {
       "id": "beauty-002",
@@ -26,7 +27,8 @@
       "badge": "BEST",
       "rating": 4.4,
       "reviews": 252,
-      "image": "https://picsum.photos/seed/facial-roller/400/400"
+      "image": "https://picsum.photos/seed/facial-roller/400/400",
+      "desc": "천연 로즈쿼츠 소재 롤러와 구아샤 세트. 마사지로 붓기 관리, 냉장 보관 후 쓰면 더 시원합니다."
     },
     {
       "id": "beauty-003",
@@ -782,7 +784,8 @@
       "badge": "BEST",
       "rating": 4.7,
       "reviews": 450,
-      "image": "https://picsum.photos/seed/neck-cooler/400/400"
+      "image": "https://picsum.photos/seed/neck-cooler/400/400",
+      "desc": "빠른 냉각 소재로 목을 즉시 시원하게. 3단계 온도 조절, 생활 방수. 여름 필수 아이템."
     },
     {
       "id": "lifestyle-002",
@@ -796,7 +799,8 @@
       "badge": "BEST",
       "rating": 4.5,
       "reviews": 403,
-      "image": "https://picsum.photos/seed/neck-fan/400/400"
+      "image": "https://picsum.photos/seed/neck-fan/400/400",
+      "desc": "핸즈프리 목걸이형 선풍기. 5000mAh 배터리로 최대 12시간, 3단 풍속 조절."
     },
     {
       "id": "lifestyle-003",
@@ -1552,7 +1556,8 @@
       "badge": "BEST",
       "rating": 4.7,
       "reviews": 425,
-      "image": "https://picsum.photos/seed/pet-fountain/400/400"
+      "image": "https://picsum.photos/seed/pet-fountain/400/400",
+      "desc": "3단계 여과 필터로 늘 신선한 물. 저소음 펌프 적용, 고양이·소형견 추천."
     },
     {
       "id": "pet-002",
@@ -1594,7 +1599,8 @@
       "badge": "NEW",
       "rating": 4.5,
       "reviews": 131,
-      "image": "https://picsum.photos/seed/grooming-brush/400/400"
+      "image": "https://picsum.photos/seed/grooming-brush/400/400",
+      "desc": "반려동물이 스스로 쓰는 셀프 그루밍 브러시. 코너·벽 부착형으로 마사지와 빗질을 동시에."
     },
     {
       "id": "pet-005",
@@ -3092,7 +3098,8 @@
       "badge": "BEST",
       "rating": 4.6,
       "reviews": 132,
-      "image": "https://picsum.photos/seed/men-skin-lotion-set/400/400"
+      "image": "https://picsum.photos/seed/men-skin-lotion-set/400/400",
+      "desc": "스킨과 로션을 한 번에. 끈적임 없는 젤 텍스처로 아침 루틴을 30초로 줄입니다."
     },
     {
       "id": "men-002",
@@ -3120,7 +3127,8 @@
       "badge": "NEW",
       "rating": 4.4,
       "reviews": 88,
-      "image": "https://picsum.photos/seed/men-blackhead-vacuum/400/400"
+      "image": "https://picsum.photos/seed/men-blackhead-vacuum/400/400",
+      "desc": "5단계 흡입 강도와 4종 팁으로 코·턱 모공을 관리하는 블랙헤드 흡입기."
     },
     {
       "id": "men-004",
@@ -3162,7 +3170,8 @@
       "badge": "BEST",
       "rating": 4.7,
       "reviews": 264,
-      "image": "https://picsum.photos/seed/men-electric-shaver/400/400"
+      "image": "https://picsum.photos/seed/men-electric-shaver/400/400",
+      "desc": "USB-C 충전 전기면도기. 생활 방수로 물 세척 가능, 출장·여행에 가볍게."
     },
     {
       "id": "men-007",
@@ -3303,9 +3312,24 @@
       "rating": 4.5,
       "reviews": 102,
       "image": "https://picsum.photos/seed/men-led-spot/400/400"
+    },
+    {
+      "id": "lifestyle-056",
+      "slug": "ringlight",
+      "name": "링라이트 + 스탠드 세트",
+      "category": "lifestyle",
+      "categoryName": "라이프스타일",
+      "price": 39900,
+      "cost": 20700,
+      "margin": 48.1,
+      "badge": "",
+      "rating": 4.6,
+      "reviews": 0,
+      "image": "",
+      "desc": "유튜브·인스타·화상회의용 10인치 LED 링라이트와 높이 조절 스탠드, 폰 거치대 세트."
     }
   ],
-  "total": 236,
+  "total": 237,
   "categories": {
     "beauty": {
       "name": "뷰티",
@@ -3315,7 +3339,7 @@
     "lifestyle": {
       "name": "라이프스타일",
       "emoji": "🏡",
-      "count": 55
+      "count": 56
     },
     "pet": {
       "name": "반려동물",
