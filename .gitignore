@@ -24,3 +24,10 @@ dist/
 
 # 배포 스크립트 (PAT 포함 - 커밋 금지)
 deploy.bat
+
+# 개인 판단용 · 대외비 문서 (공개 저장소이므로 절대 커밋 금지)
+*.docx
+*.pptx
+*.xlsx
+*.hwp
+*.hwpx
