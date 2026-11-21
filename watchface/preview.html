@@ -164,28 +164,29 @@ function drawTrain(g,T,s){
   gear(g,236,184,27,42,-f*.5,T.gear2,5);             // third wheel
   gear(g,242,264,23,36,f,T.gear,4);                  // fourth wheel
 }
-function drawTourb(g,T,s,t){
-  g.save();g.translate(TB.x,TB.y);
+function drawBed(g){
   g.beginPath();g.arc(0,0,44,0,TAU);g.fillStyle='rgba(0,0,0,.6)';g.fill();
   g.strokeStyle='rgba(255,255,255,.14)';g.lineWidth=1;g.stroke();
-  // balance wheel
-  g.save();g.rotate(s/60*TAU+Math.sin(t*TAU*3)*2.1);
+}
+function drawBalance(g,T){
   g.strokeStyle=T.bal;g.lineWidth=3.6;g.beginPath();g.arc(0,0,25,0,TAU);g.stroke();
   g.lineWidth=2.6;g.beginPath();g.moveTo(-25,0);g.lineTo(25,0);g.stroke();
   g.fillStyle=T.bal;for(let i=0;i<4;i++){const a=i/4*TAU+.78;g.beginPath();g.arc(Math.cos(a)*25,Math.sin(a)*25,2.8,0,TAU);g.fill();}
   g.strokeStyle='rgba(120,160,255,.75)';g.lineWidth=.8;g.beginPath();
   for(let a=0;a<TAU*4;a+=.2){const rr=2+a*.62;a===0?g.moveTo(rr,0):g.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}g.stroke();
-  g.restore();
-  // cage, one turn per minute
-  g.save();g.rotate(s/60*TAU);
+}
+function drawCage(g,T,spin){
   g.strokeStyle=T.cage;g.lineWidth=2.6;g.beginPath();g.arc(0,0,39,0,TAU);g.stroke();
   g.lineWidth=2.2;for(let i=0;i<3;i++){const a=i/3*TAU-TAU/4;g.beginPath();g.moveTo(Math.cos(a)*7,Math.sin(a)*7);g.lineTo(Math.cos(a)*39,Math.sin(a)*39);g.stroke();}
   g.fillStyle=T.sec;g.beginPath();g.moveTo(0,-44);g.lineTo(-4,-35);g.lineTo(4,-35);g.closePath();g.fill();
+  const a0=TAU/4+TAU/6;gear(g,Math.cos(a0)*31,Math.sin(a0)*31,7,15,spin,T.gear2,3);
+}
+function drawTourb(g,T,s,t){
+  const c=s/60*TAU;
+  g.save();g.translate(TB.x,TB.y);drawBed(g);
+  g.save();g.rotate(c+Math.sin(t*TAU*3)*2.1);drawBalance(g,T);g.restore();
+  g.save();g.rotate(c);drawCage(g,T,-s*1.05);g.restore();
   g.restore();
-  g.save();g.rotate(s/60*TAU);g.translate(0,31);g.restore();
-  g.restore();
-  const a=s/60*TAU+TAU/4+TAU/6;
-  gear(g,TB.x+Math.cos(a)*31,TB.y+Math.sin(a)*31,7,15,-s*1.05,T.gear2,3);
 }
 function drawOver(g,T){
   [[60,110,134,154],[308,110,236,184],[70,350,120,322],[298,350,248,322]].forEach(b=>bar(g,T,b[0],b[1],b[2],b[3],9));
@@ -244,6 +245,6 @@ const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').mat
 function loop(){frame();calm?setTimeout(loop,1000):requestAnimationFrame(loop);}
 build();loop();
 if(document.fonts&&document.fonts.load){document.fonts.load('700 30px Oxanium').then(build).catch(function(){});}
-window.__face={TH,W,H,drawBase,drawOver,drawTrain,drawTourb,hand,secHand,gear};
+window.__face={TH,W,H,TB,cx,cy,drawBase,drawOver,drawTrain,drawTourb,drawBed,drawBalance,drawCage,hand,secHand,gear};
 })();
 </script>
